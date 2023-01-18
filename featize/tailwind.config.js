@@ -13,6 +13,9 @@ module.exports = {
       screen: {
         retina: "300dpi",
       },
+      gridTemplateColumns: {
+        features: "minmax(0, 6fr) repeat(3, minmax(0, 4fr)) minmax(0, 1.5fr)",
+      },
       colors: {
         app: "#03bfc6",
       },

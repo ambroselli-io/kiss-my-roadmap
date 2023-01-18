@@ -15,19 +15,6 @@ const Schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-Schema.methods.me = function () {
-  return {
-    _id: this._id,
-    content: this.content,
-    devCost: this.devCost,
-    businessValue: this.businessValue,
-    occurency: this.occurency,
-    priority: this.priority,
-    status: this.status,
-    project: this.project,
-  };
-};
-
 const FeatureModel = dbConnection.models[MODELNAME] || dbConnection.model(MODELNAME, Schema);
 
 if (process.env.NODE_ENV === "production") {

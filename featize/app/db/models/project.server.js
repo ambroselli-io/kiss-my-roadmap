@@ -7,6 +7,9 @@ const Schema = new mongoose.Schema(
     title: { type: String },
     description: { type: String },
     organisation: { type: mongoose.Schema.Types.ObjectId, ref: "Organisation" },
+    sortBy: { type: String, default: "" },
+    sortOrder: { type: String, enum: ["ASC", "DESC"], default: "" },
+    sortedFeaturesIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feature" }],
   },
   { timestamps: true }
 );
@@ -17,6 +20,9 @@ Schema.methods.me = function () {
     title: this.title,
     description: this.description,
     organisation: this.organisation,
+    sortBy: this.sortBy,
+    sortOrder: this.sortOrder,
+    sortedFeaturesIds: this.sortedFeaturesIds,
   };
 };
 
