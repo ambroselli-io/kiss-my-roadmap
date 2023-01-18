@@ -1,0 +1,79 @@
+table {
+  width: 100%;
+  padding: 1rem;
+  background: #fff;
+  -fs-table-paginate: paginate;
+}
+
+table thead {
+  display: table-header-group;
+}
+
+table thead tr {
+  height: 2.5rem;
+}
+
+table tbody {
+  box-shadow: 0 4px 8px rgba(29, 32, 33, 0.05);
+}
+
+table tr {
+  height: 3.5rem;
+}
+
+table tbody > tr:nth-child(odd) {
+  background-color: #f7f9fa;
+}
+
+table tbody > tr:hover {
+  background-color: #b9b9b9;
+}
+
+table thead td {
+  color: #008e7f;
+  text-align: left;
+  padding: 0.5rem 0.5rem;
+}
+
+table thead td,
+table thead td * {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+table thead .title {
+  caption-side: top;
+  font-weight: bold;
+  font-size: 24px;
+  line-height: 32px;
+  padding: 20px 0 10px 0;
+  width: 100%;
+  color: #1d2021;
+  text-transform: none;
+}
+
+table tbody td {
+  padding: 0.25rem 0.5rem;
+  font-size: 14px;
+}
+
+table td.small {
+  min-width: 50px;
+}
+
+table td.not-small {
+  min-width: 100px;
+}
+
+table td:not(:last-of-type) {
+  border-right: 1px solid #dddddd55;
+}
+
+table tbody > tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+table tbody > tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
+}

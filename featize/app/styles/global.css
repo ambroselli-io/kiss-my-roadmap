@@ -1,0 +1,12 @@
+input[type="radio"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+}
+
+.debug,
+.debug * {
+  border: 2px solid black;
+}

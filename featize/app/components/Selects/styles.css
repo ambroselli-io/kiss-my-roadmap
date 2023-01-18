@@ -1,0 +1,7 @@
+.select__placeholder {
+  /* text-sm */
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  /* text-gray-400  */
+  color: #9ca3af !important;
+}
