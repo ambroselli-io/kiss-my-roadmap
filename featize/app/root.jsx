@@ -125,7 +125,7 @@ const App = () => {
         <Meta />
         <Links />
       </head>
-      <body className="flex min-h-screen w-screen flex-col scroll-smooth bg-[#fafbfe] antialiased outline-app">
+      <body className="flex min-h-screen w-screen flex-col scroll-smooth bg-white antialiased outline-app">
         <Outlet />
         <ScrollRestoration />
         <Scripts />

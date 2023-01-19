@@ -1,4 +1,4 @@
-import { Outlet, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
+import { Form, Outlet, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
 import { json } from "@remix-run/node";
@@ -23,6 +23,15 @@ export const action = async ({ request, params }) => {
     return json({ ok: true });
   }
 
+  if (formData.get("action") === "updateProject") {
+    const projectId = params.projectId;
+    const project = await ProjectModel.findById(projectId);
+    if (formData.get("title")) project.title = formData.get("title");
+    if (formData.get("description")) project.description = formData.get("description");
+    await project.save();
+    return json({ ok: true });
+  }
+
   if (formData.get("featureId")) {
     const feature = await FeatureModel.findById(formData.get("featureId"));
     const projectId = params.projectId;
@@ -30,6 +39,7 @@ export const action = async ({ request, params }) => {
     if (!feature) return json({ ok: false });
     if (formData.get("content")) {
       feature.content = formData.get("content");
+      if (feature.content?.length > 0 && feature.status === "__new") feature.status = "";
       if (["content"].includes(project.sortBy)) project.sortBy = null;
     }
     if (formData.get("devCost")) {
@@ -50,7 +60,6 @@ export const action = async ({ request, params }) => {
         project.sortBy = null;
       }
     }
-    feature.set({ status: "" });
     await project.save();
     await feature.save();
     return json({ ok: true });
@@ -115,17 +124,58 @@ export default function Index() {
     [sortBy, sortOrder, submit]
   );
 
+  const submitMetadata = (e) => {
+    const formData = new FormData();
+    formData.append("action", "updateProject");
+    formData.append(e.target.name, e.target.value);
+    submit(formData, { method: "POST", replace: true });
+  };
+
   return (
-    <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-hidden">
+    <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto">
       <Outlet />
-      <header>{project.title}</header>
-      <main className="relative flex flex-1 basis-full justify-center overflow-auto">
+      <main className="flex flex-1 basis-full flex-col justify-center pb-8">
+        <Form className="flex shrink-0 flex-col pb-10" onBlur={submitMetadata}>
+          <input
+            type="text"
+            name="title"
+            defaultValue={project.title}
+            className="p-8 text-4xl font-bold"
+            placeholder="Write here the title of your project. 🐉"
+          />
+          <div className="relative h-min">
+            <div
+              contentEditable
+              name="description"
+              className="pointer-events-none invisible py-4 px-12"
+              placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
+            >
+              {project.description.split("\n").map((item, key) => (
+                <span key={key}>
+                  {item}
+                  <br />
+                </span>
+              ))}
+            </div>
+            <textarea
+              defaultValue={project.description}
+              name="description"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  submitMetadata(e);
+                }
+              }}
+              className="absolute inset-0 h-full py-4 px-12"
+              placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
+            />
+          </div>
+        </Form>
         <div className="relative w-full max-w-full">
           <div
             aria-roledescription="Header of the list of features - Clicking on a column header can sort the feature by the column, ascending or descending"
             className="sticky top-0 z-50 grid grid-cols-features"
           >
-            <div className="flex items-start justify-center border-l-0 border-r-2 border-b-4 border-gray-900 py-4"></div>
+            <div className="flex items-start justify-center border-l-0 border-r-2 border-b-4 border-gray-900 bg-white py-4"></div>
             <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
               <SortButton field="feature" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Features" field="feature" onClick={onNameClick} />
@@ -175,9 +225,6 @@ const Feature = ({ feature, index }) => {
       key={feature._id}
       aria-label={feature.content}
       className="group grid grid-cols-features"
-      onChange={(e) => {
-        featureFetcher.submit(e.target.form, { method: "post", replace: false });
-      }}
     >
       {/* <div className="flex-shrink-0 flex-grow-0 basis-2 cursor-pointer border-x-2 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
                   <p className="m-0">{index}</p>
@@ -203,6 +250,9 @@ const Feature = ({ feature, index }) => {
           }
           name="content"
           className="h-full min-h-max w-full p-4"
+          onBlur={(e) => {
+            featureFetcher.submit(e.target.form, { method: "post", replace: false });
+          }}
         />
       </div>
       <div className="shrink-1 flex grow-0 basis-1/4 flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
