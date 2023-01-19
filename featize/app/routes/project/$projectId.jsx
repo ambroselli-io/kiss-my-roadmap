@@ -191,9 +191,13 @@ export default function Index() {
               <SortButton field="priority" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Priority" field="priority" onClick={onNameClick} />
             </div>
-            <div className="flex cursor-pointer border-y-4 border-l-2 border-r-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
               <SortButton field="score" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Score" field="score" onClick={onNameClick} />
+            </div>
+            <div className="flex cursor-pointer border-y-4 border-l-2 border-r-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+              <SortButton field="status" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+              <HeaderButton title="Status" field="score" onClick={onNameClick} />
             </div>
           </div>
           {features.map((feature, index) => (
@@ -240,7 +244,7 @@ const Feature = ({ feature, index }) => {
           <OpenTrash className="h-8 w-8 text-red-700" />
         </button>
       </div>
-      <div className="shrink-1 grow-0 basis-1/3 cursor-pointer border-x-2 border-b-4 border-gray-900 bg-white text-left font-medium text-gray-900">
+      <div className="cursor-pointer border-x-2 border-b-4 border-gray-900 bg-white text-left font-medium text-gray-900">
         <textarea
           type="textarea"
           defaultValue={feature.content}
@@ -254,7 +258,7 @@ const Feature = ({ feature, index }) => {
           }}
         />
       </div>
-      <div className="shrink-1 flex grow-0 basis-1/4 flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
         {feature._id !== "new" && (
           <>
             <p className="break-words text-center opacity-70">
@@ -264,7 +268,7 @@ const Feature = ({ feature, index }) => {
           </>
         )}
       </div>
-      <div className="shrink-1 flex grow-0 basis-1/4 flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
         {feature._id !== "new" && (
           <>
             <p className="break-words text-center opacity-70">How much does it cost to develop this feature?</p>
@@ -272,7 +276,7 @@ const Feature = ({ feature, index }) => {
           </>
         )}
       </div>
-      <div className="shrink-1 flex grow-0 basis-1/4 flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
         {feature._id !== "new" && (
           <>
             <p className="break-words text-center opacity-70">
@@ -282,13 +286,14 @@ const Feature = ({ feature, index }) => {
           </>
         )}
       </div>
-      <div className="shrink-1 grow-0 basis-1/12 border-l-2 border-r-4 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+      <div className="border-x-2 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
         {feature._id !== "new" && (
           <>
             <Score feature={feature} featureFetcher={featureFetcher} />
           </>
         )}
       </div>
+      <div className="flex flex-col items-stretch justify-center gap-2 border-l-2 border-r-4 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900"></div>
     </featureFetcher.Form>
   );
 };
