@@ -5,6 +5,7 @@ import { json } from "@remix-run/node";
 import { useMemo, useCallback } from "react";
 import { appendScore, getScore } from "~/utils/score";
 import { sortFeatures } from "~/utils/sort";
+import OpenTrash from "~/components/OpenTrash";
 
 export const action = async ({ request, params }) => {
   const formData = await request.formData();
@@ -15,6 +16,10 @@ export const action = async ({ request, params }) => {
     if (formData.get("sortOrder")) project.sortOrder = formData.get("sortOrder");
     if (!project.sortOrder) project.sortOrder = "ASC";
     await project.save();
+    return json({ ok: true });
+  }
+  if (formData.get("action") === "deleteFeature") {
+    await FeatureModel.findByIdAndDelete(formData.get("featureId"));
     return json({ ok: true });
   }
 
@@ -89,14 +94,6 @@ export const loader = async ({ request, params }) => {
   }
 };
 
-const newFeature = {
-  _id: "new",
-  content: "",
-  devCost: null,
-  businessValue: null,
-  priority: 0,
-};
-
 export default function Index() {
   const { project, features } = useLoaderData();
 
@@ -126,8 +123,9 @@ export default function Index() {
         <div className="relative w-full max-w-full">
           <div
             aria-roledescription="Header of the list of features - Clicking on a column header can sort the feature by the column, ascending or descending"
-            className="sticky top-0 z-50 grid grid-cols-features border-x-2 border-gray-900"
+            className="sticky top-0 z-50 grid grid-cols-features"
           >
+            <div className="flex items-start justify-center border-l-0 border-r-2 border-b-4 border-gray-900 py-4"></div>
             <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
               <SortButton field="feature" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Features" field="feature" onClick={onNameClick} />
@@ -144,13 +142,13 @@ export default function Index() {
               <SortButton field="priority" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Priority" field="priority" onClick={onNameClick} />
             </div>
-            <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex cursor-pointer border-y-4 border-l-2 border-r-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
               <SortButton field="score" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Score" field="score" onClick={onNameClick} />
             </div>
           </div>
           {features.map((feature, index) => (
-            <Feature key={feature._id} feature={feature} />
+            <Feature key={feature._id} feature={feature} index={index} />
           ))}
         </div>
       </main>
@@ -158,8 +156,15 @@ export default function Index() {
   );
 }
 
-const Feature = ({ feature }) => {
+const Feature = ({ feature, index }) => {
   const featureFetcher = useFetcher();
+
+  if (
+    featureFetcher?.submission?.formData?.get("featureId") === feature._id &&
+    featureFetcher?.submission?.formData?.get("action") === "deleteFeature"
+  ) {
+    return null;
+  }
 
   return (
     <featureFetcher.Form
@@ -169,7 +174,7 @@ const Feature = ({ feature }) => {
       id={`feature-${feature._id}`}
       key={feature._id}
       aria-label={feature.content}
-      className="grid grid-cols-features border-x-2 border-gray-900"
+      className="group grid grid-cols-features"
       onChange={(e) => {
         featureFetcher.submit(e.target.form, { method: "post", replace: false });
       }}
@@ -178,6 +183,17 @@ const Feature = ({ feature }) => {
                   <p className="m-0">{index}</p>
                 </div> */}
       <input type="hidden" name="featureId" defaultValue={feature._id} />
+      <div className="flex flex-col items-center justify-between border-l-4 border-r-2 border-b-4 border-gray-900 py-4">
+        {index + 1}
+        <button
+          type="submit"
+          name="action"
+          value="deleteFeature"
+          className="opacity-0 transition-all group-hover:opacity-100"
+        >
+          <OpenTrash className="h-8 w-8 text-red-700" />
+        </button>
+      </div>
       <div className="shrink-1 grow-0 basis-1/3 cursor-pointer border-x-2 border-b-4 border-gray-900 bg-white text-left font-medium text-gray-900">
         <textarea
           type="textarea"
@@ -217,7 +233,7 @@ const Feature = ({ feature }) => {
           </>
         )}
       </div>
-      <div className="shrink-1 grow-0 basis-1/12 border-x-2 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+      <div className="shrink-1 grow-0 basis-1/12 border-l-2 border-r-4 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
         {feature._id !== "new" && (
           <>
             <Score feature={feature} featureFetcher={featureFetcher} />
