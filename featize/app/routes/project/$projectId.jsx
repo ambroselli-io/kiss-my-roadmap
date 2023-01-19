@@ -145,8 +145,7 @@ export default function Index() {
           />
           <div className="relative h-min">
             <div
-              contentEditable
-              name="description"
+              aria-hidden={true}
               className="pointer-events-none invisible py-4 px-12"
               placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
             >
