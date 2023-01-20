@@ -172,7 +172,7 @@ export default function Index() {
                   submitMetadata(e);
                 }
               }}
-              className="absolute inset-0 h-full py-4 px-12"
+              className="absolute inset-0 h-full w-full py-4 px-12"
               placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
             />
           </div>
