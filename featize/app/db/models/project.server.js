@@ -5,6 +5,7 @@ const MODELNAME = "Project";
 const Schema = new mongoose.Schema(
   {
     title: { type: String },
+    slug: { type: String },
     description: { type: String },
     organisation: { type: mongoose.Schema.Types.ObjectId, ref: "Organisation" },
     sortBy: { type: String, default: "" },
