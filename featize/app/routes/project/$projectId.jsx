@@ -43,20 +43,27 @@ export const action = async ({ request, params }) => {
       if (["content"].includes(project.sortBy)) project.sortBy = null;
     }
     if (formData.get("devCost")) {
-      feature.devCost = formData.get("devCost");
+      feature.devCost = formData.get("devCost") === feature.devCost ? "" : formData.get("devCost");
       if (["devCost", "score"].includes(project.sortBy)) {
         project.sortBy = null;
       }
     }
     if (formData.get("businessValue")) {
-      feature.businessValue = formData.get("businessValue");
+      feature.businessValue =
+        formData.get("businessValue") === feature.businessValue ? "" : formData.get("businessValue");
       if (["businessValue", "score"].includes(project.sortBy)) {
         project.sortBy = null;
       }
     }
     if (formData.get("priority")) {
-      feature.priority = formData.get("priority");
+      feature.priority = formData.get("priority") === feature.priority ? "" : formData.get("priority");
       if (["priority", "score"].includes(project.sortBy)) {
+        project.sortBy = null;
+      }
+    }
+    if (formData.get("status")) {
+      feature.status = formData.get("status") === feature.status ? "" : formData.get("status");
+      if (["status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
     }
@@ -112,6 +119,7 @@ export default function Index() {
   const onNameClick = useCallback(
     (e) => {
       const sortkey = e.currentTarget.getAttribute("data-sortkey");
+      console.log(sortkey);
       const formData = new FormData();
       formData.append("action", "sort");
       if (sortBy === sortkey) {
@@ -197,7 +205,7 @@ export default function Index() {
             </div>
             <div className="flex cursor-pointer border-y-4 border-l-2 border-r-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
               <SortButton field="status" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title="Status" field="score" onClick={onNameClick} />
+              <HeaderButton title="Status" field="status" onClick={onNameClick} />
             </div>
           </div>
           {features.map((feature, index) => (
@@ -259,7 +267,7 @@ const Feature = ({ feature, index }) => {
         />
       </div>
       <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
-        {feature._id !== "new" && (
+        {feature.status !== "__new" && (
           <>
             <p className="break-words text-center opacity-70">
               How much value does this feature bring to the business?
@@ -269,7 +277,7 @@ const Feature = ({ feature, index }) => {
         )}
       </div>
       <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
-        {feature._id !== "new" && (
+        {feature.status !== "__new" && (
           <>
             <p className="break-words text-center opacity-70">How much does it cost to develop this feature?</p>
             <ButtonsXSToXL name="devCost" feature={feature} featureFetcher={featureFetcher} />
@@ -277,7 +285,7 @@ const Feature = ({ feature, index }) => {
         )}
       </div>
       <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
-        {feature._id !== "new" && (
+        {feature.status !== "__new" && (
           <>
             <p className="break-words text-center opacity-70">
               Use this to help you prioritize your features: if you really want it, give it a YES.
@@ -287,13 +295,19 @@ const Feature = ({ feature, index }) => {
         )}
       </div>
       <div className="border-x-2 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
-        {feature._id !== "new" && (
+        {feature.status !== "__new" && (
           <>
             <Score feature={feature} featureFetcher={featureFetcher} />
           </>
         )}
       </div>
-      <div className="flex flex-col items-stretch justify-center gap-2 border-l-2 border-r-4 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900"></div>
+      <div className="flex flex-col items-stretch justify-center gap-2 border-l-2 border-r-4 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+        {feature.status !== "__new" && (
+          <>
+            <ButtonsSatus name="status" feature={feature} featureFetcher={featureFetcher} />
+          </>
+        )}
+      </div>
     </featureFetcher.Form>
   );
 };
@@ -315,8 +329,8 @@ const HeaderButton = ({ title, field, onClick }) => {
 const SortButton = ({ field, onClick, sortOrder, sortBy }) => {
   if (sortBy !== field) return null;
   return (
-    <button onClick={onClick} type="button" aria-label="Changer l'ordre de tri" data-sortkey={field}>
-      <span className="mr-4">
+    <button className="mr-4" onClick={onClick} type="button" aria-label="Changer l'ordre de tri" data-sortkey={field}>
+      <span>
         {sortOrder === "ASC" && `\u00A0\u2193`}
         {sortOrder === "DESC" && `\u00A0\u2191`}
       </span>
@@ -329,7 +343,10 @@ const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
       const newValue = featureFetcher.submission.formData?.get(name);
-      if (newValue) return newValue;
+      if (newValue) {
+        if (newValue === feature[name]) return "";
+        return newValue;
+      }
     }
     return feature[name];
   }, [feature, name, featureFetcher]);
@@ -420,7 +437,10 @@ const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
       const newValue = featureFetcher.submission.formData?.get(name);
-      if (newValue) return newValue;
+      if (newValue) {
+        if (newValue === feature[name]) return "";
+        return newValue;
+      }
     }
     return feature[name];
   }, [feature, name, featureFetcher]);
@@ -449,6 +469,7 @@ const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
             : "border-opacity-40 bg-red-200 bg-opacity-40 text-red-700 text-opacity-40",
           "active:!bg-red-700 active:!text-white",
           "basis-1/4 rounded border-2 border-red-700",
+          selected === "" ? "hidden" : "",
         ].join(" ")}
         name={name}
         type="submit"
@@ -461,13 +482,107 @@ const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
   );
 };
 
+const ButtonsSatus = ({ feature, name, featureFetcher }) => {
+  const selected = useMemo(() => {
+    if (["loading", "submitting"].includes(featureFetcher.state)) {
+      if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
+      const newValue = featureFetcher.submission.formData?.get(name);
+      if (newValue) {
+        if (newValue === feature[name]) return "";
+        return newValue;
+      }
+    }
+    return feature[name];
+  }, [feature, name, featureFetcher]);
+
+  return (
+    <div className="flex flex-col items-center gap-1 px-1">
+      <button
+        className={[
+          selected === "TODO" ? "bg-blue-700 text-white" : "",
+          "active:!bg-blue-700 active:!text-white",
+          "rounded-full border-2 border-blue-700 px-6",
+          selected === "" ? "border-opacity-40 bg-blue-200 bg-opacity-40 text-blue-700 text-opacity-40" : "",
+          !["", "TODO"].includes(selected) ? "hidden" : "",
+        ].join(" ")}
+        name={name}
+        type="submit"
+        form={`feature-${feature._id}`}
+        value="TODO"
+      >
+        To do
+      </button>
+      <button
+        className={[
+          selected === "INPROGRESS" ? "bg-yellow-300 text-white" : "",
+          "active:!bg-yellow-300 active:!text-white",
+          "rounded-full border-2 border-yellow-400 px-6",
+          selected === "" ? "border-opacity-40 bg-yellow-100 bg-opacity-40 text-gray-500 text-opacity-40" : "",
+          !["", "INPROGRESS"].includes(selected) ? "hidden" : "",
+        ].join(" ")}
+        name={name}
+        type="submit"
+        form={`feature-${feature._id}`}
+        value="INPROGRESS"
+      >
+        In progress
+      </button>
+      <button
+        className={[
+          selected === "NOTREADYYET" ? "bg-red-500 text-white" : "",
+          "active:!bg-red-500 active:!text-white",
+          "rounded-full border-2 border-red-500 px-6",
+          selected === "" ? "border-opacity-40 bg-red-200 bg-opacity-40 text-red-700 text-opacity-40" : "",
+          !["", "NOTREADYYET"].includes(selected) ? "hidden" : "",
+        ].join(" ")}
+        name={name}
+        type="submit"
+        form={`feature-${feature._id}`}
+        value="NOTREADYYET"
+      >
+        Not ready yet
+      </button>
+      <button
+        className={[
+          selected === "DONE" ? "bg-green-700 text-white" : "",
+          "active:!bg-green-700 active:!text-white",
+          "rounded-full border-2 border-green-700 px-6",
+          selected === "" ? "border-opacity-40 bg-green-200 bg-opacity-40 text-green-700 text-opacity-40" : "",
+          !["", "DONE"].includes(selected) ? "hidden" : "",
+        ].join(" ")}
+        name={name}
+        type="submit"
+        form={`feature-${feature._id}`}
+        value="DONE"
+      >
+        Done
+      </button>
+      <button
+        className={[
+          selected === "KO" ? "bg-gray-900 text-white" : "",
+          "active:!bg-gray-900 active:!text-white",
+          "rounded-full border-2 border-gray-900 px-6",
+          selected === "" ? "border-opacity-40 bg-white bg-opacity-40 text-gray-900 text-opacity-40" : "",
+          !["", "KO"].includes(selected) ? "hidden" : "",
+        ].join(" ")}
+        name={name}
+        type="submit"
+        form={`feature-${feature._id}`}
+        value="KO"
+      >
+        KO
+      </button>
+    </div>
+  );
+};
+
 const Score = ({ feature, featureFetcher }) => {
   const score = useMemo(() => {
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature.score;
       const optimisticFeature = { ...feature };
       for (const [field, value] of featureFetcher.submission.formData.entries()) {
-        optimisticFeature[field] = value;
+        optimisticFeature[field] = value === feature[field] ? "" : value;
       }
       return getScore(optimisticFeature);
     }

@@ -1,7 +1,21 @@
 import { businessValueScores, devCostScores } from "./score";
 
-const defaultSort = (a, b, sortOrder) =>
-  sortOrder === "ASC" ? a.content.localeCompare(b.content) : b.content.localeCompare(a.content);
+const defaultSort = (a, b, sortOrder) => {
+  if (!a.score && !b.score) {
+    sortOrder === "ASC" ? a.content.localeCompare(b.content) : b.content.localeCompare(a.content);
+  }
+  if (!a.score) return sortOrder === "ASC" ? 1 : -1;
+  if (!b.score) return sortOrder === "DESC" ? 1 : -1;
+  return sortOrder === "ASC" ? b.score - a.score : a.score - b.score;
+};
+
+const statusSort = {
+  TODO: 1,
+  INPROGRESS: 2,
+  DONE: 3,
+  NOTREADYYET: 4,
+  KO: 5,
+};
 
 export const sortFeatures = (sortBy, sortOrder) => (a, b) => {
   if (sortBy === "createdAt") {
@@ -31,13 +45,18 @@ export const sortFeatures = (sortBy, sortOrder) => (a, b) => {
     if (!b.priority) return sortOrder === "DESC" ? 1 : -1;
     return sortOrder === "ASC" ? a.priority.localeCompare(b.priority) : b.priority.localeCompare(a.priority);
   }
-  if (sortBy === "score") {
-    if (!a.score && !b.score) return defaultSort(a, b, sortOrder);
-    if (!a.score) return sortOrder === "ASC" ? 1 : -1;
-    if (!b.score) return sortOrder === "DESC" ? 1 : -1;
-    return sortOrder === "ASC" ? b.score - a.score : a.score - b.score;
+  if (sortBy === "status") {
+    if (!statusSort[a.status] && !statusSort[b.status]) return defaultSort(a, b, sortOrder);
+    if (!statusSort[a.status]) return sortOrder === "ASC" ? 1 : -1;
+    if (!statusSort[b.status]) return sortOrder === "DESC" ? 1 : -1;
+    return sortOrder === "ASC"
+      ? statusSort[a.status] - statusSort[b.status]
+      : statusSort[b.status] - statusSort[a.status];
+  }
+  if (sortBy === "feature") {
+    return sortOrder === "ASC" ? a.content.localeCompare(b.content) : b.content.localeCompare(a.content);
   }
   // DEFAULT SORTING
-  // (sortBy === 'content')
+  // (sortBy === 'score')
   return defaultSort(a, b, sortOrder);
 };

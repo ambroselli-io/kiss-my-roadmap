@@ -7,11 +7,11 @@
   "sideEffects": false,
   "scripts": {
     "build": "run-s build:*",
-    "build:css": "tailwindcss -m -i app/styles/tailwind.css -o app/styles/tailwind-compiled.css",
+    "build:css": "tailwindcss -m -i ./app/styles/tailwind.css -o ./app/styles/tailwind-compiled.css",
     "build:remix": "remix build --sourcemap",
     "dev": "run-p dev:*",
     "dev:remix": "remix dev",
-    "dev:css": "tailwindcss -w -i app/styles/tailwind.css -o app/styles/tailwind-compiled.css",
+    "dev:css": "tailwindcss -w -i ./app/styles/tailwind.css -o ./app/styles/tailwind-compiled.css",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve build",
     "clean-build-and-cache": "rm -rf ./.cache && rm -rf ./build && rm -rf ./public/build",
