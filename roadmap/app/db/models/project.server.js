@@ -9,7 +9,7 @@ const Schema = new mongoose.Schema(
     description: { type: String },
     organisation: { type: mongoose.Schema.Types.ObjectId, ref: "Organisation" },
     sortBy: { type: String, default: "" },
-    sortOrder: { type: String, enum: ["ASC", "DESC"], default: "" },
+    sortOrder: { type: String, enum: ["ASC", "DESC", ""], default: "" },
     sortedFeaturesIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feature" }],
   },
   { timestamps: true }

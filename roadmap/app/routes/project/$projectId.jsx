@@ -142,7 +142,7 @@ export default function Index() {
   return (
     <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto">
       <Outlet />
-      <main className="flex flex-1 basis-full flex-col justify-center pb-8">
+      <main className="flex flex-1 basis-full flex-col justify-start pb-8">
         <Form className="flex shrink-0 flex-col pb-10" onBlur={submitMetadata}>
           <input
             type="text"
@@ -154,10 +154,10 @@ export default function Index() {
           <div className="relative h-min">
             <div
               aria-hidden={true}
-              className="pointer-events-none invisible py-4 px-12"
+              className="pointer-events-none invisible min-h-[5rem] py-4 px-12"
               placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
             >
-              {project.description.split("\n").map((item, key) => (
+              {project.description?.split("\n").map((item, key) => (
                 <span key={key}>
                   {item}
                   <br />
@@ -172,7 +172,7 @@ export default function Index() {
                   submitMetadata(e);
                 }
               }}
-              className="absolute inset-0 h-full w-full py-4 px-12"
+              className="absolute inset-0 h-full min-h-[5rem] w-full py-4 px-12"
               placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
             />
           </div>
