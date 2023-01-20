@@ -1,5 +1,5 @@
 const MONGO_URL = process.env.MONGODB_ADDON_URI;
-const APP_NAME = "The TShirt Sizes Features Prioritizing";
+const APP_NAME = "Roadmap";
 const MONGODB_DB_NAME = APP_NAME;
 const APP_URL = process.env.APP_URL;
 const PORT = process.env.PORT || 8080;
