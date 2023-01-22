@@ -13,9 +13,13 @@ input[type="radio"] {
 
 :root {
   --scoreWidthToggleWithHelp: 1.5fr;
+  --scoreWidthToggleWithPriority: 2fr;
 }
 html:has(.help-score) {
   --scoreWidthToggleWithHelp: 4fr;
+}
+html:has(.help-priority) {
+  --scoreWidthToggleWithPriority: 4fr;
 }
 
 .help-block p {
