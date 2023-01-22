@@ -16,6 +16,7 @@ const Schema = new mongoose.Schema(
     sortBy: { type: String, default: "" },
     sortOrder: { type: String, enum: ["ASC", "DESC", ""], default: "" },
     sortedFeaturesIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feature" }],
+    filteredStatuses: { type: [String], default: [] },
   },
   { timestamps: true }
 );
@@ -29,6 +30,7 @@ Schema.methods.me = function () {
     sortBy: this.sortBy,
     sortOrder: this.sortOrder,
     sortedFeaturesIds: this.sortedFeaturesIds,
+    filteredStatuses: this.filteredStatuses,
   };
 };
 

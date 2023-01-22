@@ -2,7 +2,7 @@ import { Form, Outlet, useFetcher, useLoaderData, useSubmit } from "@remix-run/r
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
 import { json } from "@remix-run/node";
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { appendScore, getScore } from "~/utils/score";
 import { sortFeatures } from "~/utils/sort";
 import OpenTrash from "~/components/OpenTrash";
@@ -18,6 +18,20 @@ export const action = async ({ request, params }) => {
     if (formData.get("sortBy")) project.sortBy = formData.get("sortBy");
     if (formData.get("sortOrder")) project.sortOrder = formData.get("sortOrder");
     if (!project.sortOrder) project.sortOrder = "ASC";
+    await project.save();
+    return json({ ok: true });
+  }
+
+  if (formData.get("action") === "filter") {
+    const projectId = params.projectId;
+    const project = await ProjectModel.findById(projectId);
+    const statusToToggle = formData.get("status");
+    if (project.filteredStatuses.includes(statusToToggle)) {
+      project.filteredStatuses = project.filteredStatuses.filter((status) => status !== statusToToggle);
+      project.sortedFeaturesIds = [];
+    } else {
+      project.filteredStatuses = [...(project.filteredStatuses || []), statusToToggle];
+    }
     await project.save();
     return json({ ok: true });
   }
@@ -87,7 +101,15 @@ export const loader = async ({ request, params }) => {
   const user = await getUserFromCookie();
   const projectId = params.projectId;
   const project = await ProjectModel.findById(projectId);
-  const features = await FeatureModel.find({ project: projectId, status: { $ne: "__new" } }).lean();
+  const features = await FeatureModel.find({
+    project: projectId,
+    status: { $nin: [...(project.filteredStatuses || []), "__new"] },
+  }).lean();
+
+  if (!project.sortedFeaturesIds || project.sortedFeaturesIds.length === 0) {
+    project.sortedFeaturesIds = features.map((f) => f._id);
+    await project.save();
+  }
 
   let augmentedFeatures = project.sortedFeaturesIds
     .map((featureId) => {
@@ -158,7 +180,6 @@ export default function Index() {
   const onNameClick = useCallback(
     (e) => {
       const sortkey = e.currentTarget.getAttribute("data-sortkey");
-      console.log(sortkey);
       const formData = new FormData();
       formData.append("action", "sort");
       if (sortBy === sortkey) {
@@ -271,7 +292,10 @@ export default function Index() {
             </div>
             <div className="flex cursor-pointer border-y-2 border-l border-r-2 border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <SortButton field="status" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title="Status" field="status" onClick={onNameClick} />
+              <div className="flex basis-full justify-between">
+                <HeaderButton title="Status" field="status" onClick={onNameClick} />
+                <StatusesFilter />
+              </div>
             </div>
           </div>
           {features.map((feature, index) => (
@@ -307,16 +331,16 @@ const Feature = ({ feature, index }) => {
                   <p className="m-0">{index}</p>
                 </div> */}
       <input type="hidden" name="featureId" defaultValue={feature._id} />
-      <div className="flex flex-col items-center justify-between border-r border-l-4 border-b-2 border-gray-900 py-4">
+      <div className="flex flex-col items-center justify-between border-r border-l-4 border-b-2 border-gray-900 pt-1">
         {index + 1}
-        {/* <button
+        <button
           type="submit"
           name="action"
           value="deleteFeature"
           className="opacity-0 transition-all group-hover:opacity-100"
         >
-          <OpenTrash className="h-8 w-8 text-red-700" />
-        </button> */}
+          <OpenTrash className="h-6 w-8 text-red-700" />
+        </button>
       </div>
       <div className="cursor-pointer border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         <textarea
@@ -404,7 +428,7 @@ const Feature = ({ feature, index }) => {
       <div className="flex flex-col items-stretch justify-center gap-2 border-l border-r-2 border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         {feature.status !== "__new" && (
           <>
-            <ButtonsSatus name="status" feature={feature} featureFetcher={featureFetcher} />
+            <ButtonsSatus feature={feature} featureFetcher={featureFetcher} />
           </>
         )}
       </div>
@@ -582,7 +606,7 @@ const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
   );
 };
 
-const ButtonsSatus = ({ feature, name, featureFetcher }) => {
+const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
   const selected = useMemo(() => {
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
@@ -672,6 +696,106 @@ const ButtonsSatus = ({ feature, name, featureFetcher }) => {
       >
         KO
       </button>
+    </div>
+  );
+};
+
+const StatusesFilter = () => {
+  const { project } = useLoaderData();
+  const [showFilter, setShowFilter] = useState(true);
+  const statusFilterFetcher = useFetcher();
+  const filteredStatuses = useMemo(() => {
+    if (!["loading", "submitting"].includes(statusFilterFetcher.state)) return project.filteredStatuses;
+    if (statusFilterFetcher.submission.formData?.get("action") !== "filter") return project.filteredStatuses;
+    const newValue = statusFilterFetcher.submission.formData?.get("status");
+    if (newValue) {
+      if (project.filteredStatuses.includes(newValue)) return project.filteredStatuses.filter((s) => s !== newValue);
+      return [...project.filteredStatuses, newValue];
+    }
+    return project.filteredStatuses;
+  }, [project.filteredStatuses, statusFilterFetcher.state, statusFilterFetcher.submission?.formData]);
+
+  return (
+    <div className="relative -my-2">
+      <button
+        type="button"
+        onClick={() => setShowFilter((f) => !f)}
+        className={["block h-full px-4 text-xs", showFilter ? "bg-black text-white" : "italic opacity-50"].join(" ")}
+      >
+        Filter{filteredStatuses.length ? ` (${filteredStatuses.length})` : ""}...
+      </button>
+      {showFilter && (
+        <statusFilterFetcher.Form
+          method="post"
+          id="status-filter"
+          // onSubmit={(e) => {
+          //   // setShowFilter(false);
+          // }}
+          className="status-filter absolute top-8 right-0 flex flex-col items-start overflow-hidden rounded border bg-white"
+        >
+          <input type="hidden" name="action" value="filter" />
+          <button
+            className={[
+              "w-full p-1 pr-4 text-left hover:bg-gray-300",
+              filteredStatuses.includes("TODO") ? "line-through" : "",
+            ].join(" ")}
+            type="submit"
+            form="status-filter"
+            name="status"
+            value="TODO"
+          >
+            To do
+          </button>
+          <button
+            className={[
+              "w-full p-1 pr-4 text-left hover:bg-gray-300",
+              filteredStatuses.includes("INPROGRESS") ? "line-through" : "",
+            ].join(" ")}
+            type="submit"
+            form="status-filter"
+            name="status"
+            value="INPROGRESS"
+          >
+            In&nbsp;progress
+          </button>
+          <button
+            className={[
+              "w-full p-1 pr-4 text-left hover:bg-gray-300",
+              filteredStatuses.includes("NOTREADYYET") ? "line-through" : "",
+            ].join(" ")}
+            type="submit"
+            form="status-filter"
+            name="status"
+            value="NOTREADYYET"
+          >
+            Not&nbsp;ready&nbsp;yet
+          </button>
+          <button
+            className={[
+              "w-full p-1 pr-4 text-left hover:bg-gray-300",
+              filteredStatuses.includes("DONE") ? "line-through" : "",
+            ].join(" ")}
+            type="submit"
+            form="status-filter"
+            name="status"
+            value="DONE"
+          >
+            Done
+          </button>
+          <button
+            className={[
+              "w-full p-1 pr-4 text-left hover:bg-gray-300",
+              filteredStatuses.includes("KO") ? "line-through" : "",
+            ].join(" ")}
+            type="submit"
+            form="status-filter"
+            name="status"
+            value="KO"
+          >
+            KO
+          </button>
+        </statusFilterFetcher.Form>
+      )}
     </div>
   );
 };
