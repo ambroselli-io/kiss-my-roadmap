@@ -699,6 +699,10 @@ video {
   margin-top: 3.5rem;
 }
 
+.mb-auto {
+  margin-bottom: auto;
+}
+
 .block {
   display: block;
 }
@@ -1177,6 +1181,10 @@ video {
 
 .border-l-0 {
   border-left-width: 0px;
+}
+
+.border-l-2 {
+  border-left-width: 2px;
 }
 
 .border-app {
@@ -2100,6 +2108,10 @@ video {
 .\[\&_\.menu-container\]\:min-w-max .menu-container {
   min-width: -moz-max-content;
   min-width: max-content;
+}
+
+.\[\&_button\]\:pointer-events-none button {
+  pointer-events: none;
 }
 
 .\[\&_button\]\:w-full button {

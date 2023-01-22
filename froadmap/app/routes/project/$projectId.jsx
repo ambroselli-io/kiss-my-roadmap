@@ -66,6 +66,7 @@ export const action = async ({ request, params }) => {
     return json({ ok: true });
   }
 
+  console.log("formData", formData.getAll("action"));
   if (formData.get("action") === "helpSettings") {
     await helpAction({ user, formData });
     return json({ ok: true });
@@ -216,7 +217,7 @@ export default function Index() {
   };
 
   return (
-    <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto">
+    <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto" key={project._id}>
       <Outlet />
       <header className="flex justify-between border-b border-gray-200 px-4 text-xs">
         <div className="flex gap-2">

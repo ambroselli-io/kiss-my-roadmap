@@ -39,9 +39,6 @@ export const HelpBlock = ({ children, helpSetting, className = "" }) => {
         className,
       ].join(" ")}
     >
-      <input type="hidden" name="action" value="helpSettings" />
-      <input type="hidden" name="helpSetting" value={helpSetting} />
-
       <button
         type="button"
         onClick={function hideSetting() {
