@@ -51,6 +51,7 @@ export const sortFeatures =
       if (!statusSort[a.status] && !statusSort[b.status]) return defaultSort(a, b, sortOrder);
       if (!statusSort[a.status]) return sortOrder === "ASC" ? 1 : -1;
       if (!statusSort[b.status]) return sortOrder === "DESC" ? 1 : -1;
+      if (statusSort[a.status] === statusSort[b.status]) return defaultSort(a, b, sortOrder);
       return sortOrder === "ASC"
         ? statusSort[a.status] - statusSort[b.status]
         : statusSort[b.status] - statusSort[a.status];

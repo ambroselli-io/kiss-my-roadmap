@@ -53,20 +53,20 @@ export const action = async ({ request, params }) => {
     }
     if (formData.get("devCost")) {
       feature.devCost = formData.get("devCost") === feature.devCost ? "" : formData.get("devCost");
-      if (["devCost", "score"].includes(project.sortBy)) {
+      if (["devCost", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
     }
     if (formData.get("businessValue")) {
       feature.businessValue =
         formData.get("businessValue") === feature.businessValue ? "" : formData.get("businessValue");
-      if (["businessValue", "score"].includes(project.sortBy)) {
+      if (["businessValue", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
     }
     if (formData.get("priority")) {
       feature.priority = formData.get("priority") === feature.priority ? "" : formData.get("priority");
-      if (["priority", "score"].includes(project.sortBy)) {
+      if (["priority", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
     }
@@ -375,8 +375,10 @@ const Feature = ({ feature, index }) => {
             {index === 0 && (
               <HelpBlock helpSetting="showPriorityHelp">
                 <p>
-                  Use this to help you prioritize your features: if you really want it, whatever cost/value, give it a
-                  YES. It will multiply the score by 5.
+                  If you decided that you'd do the feature anyway soon, if you really want it whatever cost/value, give
+                  it a YES.
+                  <br />
+                  It will multiply the score by 5.
                 </p>
               </HelpBlock>
             )}
