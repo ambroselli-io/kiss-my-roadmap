@@ -17,9 +17,19 @@ const Schema = new mongoose.Schema(
     sortOrder: { type: String, enum: ["ASC", "DESC", ""], default: "" },
     sortedFeaturesIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feature" }],
     filteredStatuses: { type: [String], default: [] },
+    deletedAt: { type: Date },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
+
+Schema.pre("find", function () {
+  this.where({ deletedAt: { $exists: false } });
+});
+
+Schema.pre("findOne", function () {
+  this.where({ deletedAt: { $exists: false } });
+});
 
 Schema.methods.me = function () {
   return {

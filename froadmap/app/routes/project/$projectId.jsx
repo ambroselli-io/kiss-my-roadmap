@@ -1,7 +1,7 @@
-import { Form, Outlet, useLoaderData, useSubmit } from "@remix-run/react";
+import { Form, Link, Outlet, useLoaderData, useSubmit } from "@remix-run/react";
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { useCallback } from "react";
 import { appendScore } from "~/utils/score";
 import { sortFeatures } from "~/utils/sort";
@@ -10,6 +10,8 @@ import { getUserFromCookie } from "~/services/auth.server";
 import { StatusesFilter } from "~/components/Feature/StatusesFilter";
 import { SortButton } from "~/components/Feature/SortButton";
 import { FeatureRow } from "~/components/Feature/FeatureRow";
+import { DropdownMenu } from "~/components/DropdownMenu";
+import OpenTrash from "~/components/OpenTrash";
 
 export const action = async ({ request, params }) => {
   const user = await getUserFromCookie();
@@ -39,8 +41,20 @@ export const action = async ({ request, params }) => {
   }
 
   if (formData.get("action") === "deleteFeature") {
-    await FeatureModel.findByIdAndDelete(formData.get("featureId"));
+    await FeatureModel.findByIdAndUpdate(formData.get("featureId"), { deletedAt: new Date(), deletedBy: user._id });
     return json({ ok: true });
+  }
+
+  if (formData.get("action") === "deleteProject") {
+    console.log("delete project");
+    const projectId = params.projectId;
+    await ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date(), deletedBy: user._id });
+    return redirect("../");
+  }
+
+  if (formData.get("action") === "newProject") {
+    const newProject = await ProjectModel.create({});
+    return redirect(`/project/${newProject._id}`);
   }
 
   if (formData.get("action") === "updateProject") {
@@ -148,7 +162,7 @@ export const loader = async ({ request, params }) => {
 export const meta = ({ data }) => {
   return [
     {
-      title: `${data.project?.title || "New project"} | Roadmap`,
+      title: `${data.project?.title || "New project"} | Froadmap`,
     },
     {
       name: "description",
@@ -156,7 +170,7 @@ export const meta = ({ data }) => {
     },
     {
       name: "og:title",
-      content: `${data.project?.title || "New project"} | Roadmap`,
+      content: `${data.project?.title || "New project"} | Froadmap`,
     },
     {
       name: "og:description",
@@ -164,7 +178,7 @@ export const meta = ({ data }) => {
     },
     {
       name: "twitter:title",
-      content: `${data.project?.title || "New project"} | Roadmap`,
+      content: `${data.project?.title || "New project"} | Froadmap`,
     },
     {
       name: "twitter:description",
@@ -204,8 +218,33 @@ export default function Index() {
   return (
     <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto">
       <Outlet />
-      <header className="flex justify-end border-b border-gray-200 px-8 py-2 text-xs">
-        <MainHelpButton />
+      <header className="flex justify-between border-b border-gray-200 px-4 text-xs">
+        <div className="flex gap-2">
+          <DropdownMenu title="Project" className="[&_.menu-container]:min-w-max">
+            <Form method="post" className="flex flex-col items-start">
+              <Link to="/" className="inline-flex items-center gap-1">
+                <div className="h-6 w-6" /> My projects
+              </Link>
+              <button type="submit" name="action" value="newProject" className="inline-flex items-center gap-1">
+                <div className="inline-flex h-6 w-6 items-center justify-center">+</div> New project
+              </button>
+              <button
+                type="submit"
+                name="action"
+                value="deleteProject"
+                className="inline-flex items-center gap-1 text-red-500 hover:text-red-600"
+                onClick={(e) => {
+                  if (!confirm("Are you sure you want to delete this project?")) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <OpenTrash className="h-6 w-6" /> Delete project
+              </button>
+            </Form>
+          </DropdownMenu>
+        </div>
+        <MainHelpButton className="py-2 px-4" />
       </header>
       <main className="flex flex-1 basis-full flex-col justify-start pb-8 text-xs">
         <Form className="flex shrink-0 flex-col pb-10" onBlur={submitMetadata}>

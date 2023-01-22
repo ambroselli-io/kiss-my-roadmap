@@ -11,9 +11,19 @@ const Schema = new mongoose.Schema(
     priority: { type: String },
     status: { type: String },
     project: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
+    deletedAt: { type: Date },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
+
+Schema.pre("find", function () {
+  this.where({ deletedAt: { $exists: false } });
+});
+
+Schema.pre("findOne", function () {
+  this.where({ deletedAt: { $exists: false } });
+});
 
 const FeatureModel = dbConnection.models[MODELNAME] || dbConnection.model(MODELNAME, Schema);
 

@@ -1,9 +1,9 @@
 import { useFetcher, useLoaderData } from "@remix-run/react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { DropdownMenu } from "../DropdownMenu";
 
 export const StatusesFilter = () => {
   const { project } = useLoaderData();
-  const [showFilter, setShowFilter] = useState(false);
   const statusFilterFetcher = useFetcher();
   const filteredStatuses = useMemo(() => {
     if (!["loading", "submitting"].includes(statusFilterFetcher.state)) return project.filteredStatuses;
@@ -17,86 +17,58 @@ export const StatusesFilter = () => {
   }, [project.filteredStatuses, statusFilterFetcher.state, statusFilterFetcher.submission?.formData]);
 
   return (
-    <div className="relative -my-2">
-      <button
-        type="button"
-        onClick={() => setShowFilter((f) => !f)}
-        className={["block h-full px-4 text-xs", showFilter ? "bg-black text-white" : "italic opacity-50"].join(" ")}
-      >
-        Filter{filteredStatuses.length ? ` (${filteredStatuses.length})` : ""}...
-      </button>
-      {showFilter && (
-        <statusFilterFetcher.Form
-          method="post"
-          id="status-filter"
-          // onSubmit={(e) => {
-          //   // setShowFilter(false);
-          // }}
-          className="status-filter absolute top-8 right-0 flex flex-col items-start overflow-hidden rounded border bg-white"
+    <DropdownMenu
+      className="-my-2 [&_.menu-button.hide-menu]:italic [&_.menu-button.hide-menu]:opacity-50 [&_.menu-container]:right-0 [&_.menu-container]:left-[unset] [&_.menu-container]:w-[unset]"
+      title={`Filter${filteredStatuses.length ? ` (${filteredStatuses.length})` : ""}...`}
+    >
+      <statusFilterFetcher.Form method="post" id="status-filter" className="status-filter flex flex-col items-start">
+        <input type="hidden" name="action" value="filter" />
+        <button
+          className={["!p-1 !pr-4", filteredStatuses.includes("TODO") ? "line-through" : ""].join(" ")}
+          type="submit"
+          form="status-filter"
+          name="status"
+          value="TODO"
         >
-          <input type="hidden" name="action" value="filter" />
-          <button
-            className={[
-              "w-full p-1 pr-4 text-left hover:bg-gray-300",
-              filteredStatuses.includes("TODO") ? "line-through" : "",
-            ].join(" ")}
-            type="submit"
-            form="status-filter"
-            name="status"
-            value="TODO"
-          >
-            To do
-          </button>
-          <button
-            className={[
-              "w-full p-1 pr-4 text-left hover:bg-gray-300",
-              filteredStatuses.includes("INPROGRESS") ? "line-through" : "",
-            ].join(" ")}
-            type="submit"
-            form="status-filter"
-            name="status"
-            value="INPROGRESS"
-          >
-            In&nbsp;progress
-          </button>
-          <button
-            className={[
-              "w-full p-1 pr-4 text-left hover:bg-gray-300",
-              filteredStatuses.includes("NOTREADYYET") ? "line-through" : "",
-            ].join(" ")}
-            type="submit"
-            form="status-filter"
-            name="status"
-            value="NOTREADYYET"
-          >
-            Not&nbsp;ready&nbsp;yet
-          </button>
-          <button
-            className={[
-              "w-full p-1 pr-4 text-left hover:bg-gray-300",
-              filteredStatuses.includes("DONE") ? "line-through" : "",
-            ].join(" ")}
-            type="submit"
-            form="status-filter"
-            name="status"
-            value="DONE"
-          >
-            Done
-          </button>
-          <button
-            className={[
-              "w-full p-1 pr-4 text-left hover:bg-gray-300",
-              filteredStatuses.includes("KO") ? "line-through" : "",
-            ].join(" ")}
-            type="submit"
-            form="status-filter"
-            name="status"
-            value="KO"
-          >
-            KO
-          </button>
-        </statusFilterFetcher.Form>
-      )}
-    </div>
+          To do
+        </button>
+        <button
+          className={["!p-1 !pr-4 ", filteredStatuses.includes("INPROGRESS") ? "line-through" : ""].join(" ")}
+          type="submit"
+          form="status-filter"
+          name="status"
+          value="INPROGRESS"
+        >
+          In&nbsp;progress
+        </button>
+        <button
+          className={["!p-1 !pr-4 ", filteredStatuses.includes("NOTREADYYET") ? "line-through" : ""].join(" ")}
+          type="submit"
+          form="status-filter"
+          name="status"
+          value="NOTREADYYET"
+        >
+          Not&nbsp;ready&nbsp;yet
+        </button>
+        <button
+          className={["!p-1 !pr-4 ", filteredStatuses.includes("DONE") ? "line-through" : ""].join(" ")}
+          type="submit"
+          form="status-filter"
+          name="status"
+          value="DONE"
+        >
+          Done
+        </button>
+        <button
+          className={["!p-1 !pr-4 ", filteredStatuses.includes("KO") ? "line-through" : ""].join(" ")}
+          type="submit"
+          form="status-filter"
+          name="status"
+          value="KO"
+        >
+          KO
+        </button>
+      </statusFilterFetcher.Form>
+    </DropdownMenu>
   );
 };

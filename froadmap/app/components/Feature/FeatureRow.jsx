@@ -36,9 +36,12 @@ export const FeatureRow = ({ feature, index }) => {
           type="submit"
           name="action"
           value="deleteFeature"
+          onClick={(e) => {
+            if (!confirm("Are you sure you want to delete this feature?")) e.preventDefault();
+          }}
           className="opacity-0 transition-all group-hover:opacity-100"
         >
-          <OpenTrash className="h-6 w-8 text-red-700" />
+          {feature.status !== "__new" && <OpenTrash className="h-6 w-8 text-red-700" />}
         </button>
       </div>
       <div className="cursor-pointer border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">

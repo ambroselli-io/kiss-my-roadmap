@@ -3,12 +3,9 @@ import { redirect } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData } from "@remix-run/react";
 import ProjectModel from "~/db/models/project.server";
 import UserModel from "~/db/models/user.server";
-import { APP_NAME } from "~/config.client";
 
 export const action = async () => {
-  console.log("action");
   const newProject = await ProjectModel.create({});
-  console.log(newProject);
   return redirect(`/project/${newProject._id}`);
 };
 
@@ -31,7 +28,7 @@ export const loader = async ({ request }) => {
 export const meta = () => {
   return [
     {
-      title: `My projects | ${APP_NAME}`,
+      title: `My projects | Froadmap`,
     },
   ];
 };
