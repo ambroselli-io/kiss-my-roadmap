@@ -1,5 +1,5 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
-import { APP_NAME, SECRET } from "../config";
+import { APP_NAME, SECRET } from "../config.server";
 import UserModel from "../db/models/user.server";
 
 const sessionExpirationTime = 1000 * 60 * 60 * 24 * 365;
@@ -16,25 +16,23 @@ export const { getSession, commitSession, destroySession } = createCookieSession
   },
 });
 
-export const getUserFromCookie = async (
-  request,
-  { redirectTo = "/", noRedirect = false } = {}
-) => {
-  const session = await getSession(request.headers.get("Cookie"));
-  if (!session) {
-    if (!noRedirect) {
-      throw redirect(redirectTo);
-    }
-  }
-  const userId = session.get("userId");
-  const user = await UserModel.findById(userId);
-  if (!user && !noRedirect) throw redirect(redirectTo);
-  if (!noRedirect) return redirect("/profil");
+export const getUserFromCookie = async (request, { redirectTo = "/", noRedirect = false } = {}) => {
+  /* TEMP */
+  const user = await UserModel.findOne();
+  // const session = await getSession(request.headers.get("Cookie"));
+  // if (!session) {
+  //   if (!noRedirect) {
+  //     throw redirect(redirectTo);
+  //   }
+  // }
+  // const userId = session.get("userId");
+  // const user = await UserModel.findById(userId);
+  // if (!user && !noRedirect) throw redirect(redirectTo);
+  // if (!noRedirect) return redirect("/profil");
   return user;
 };
 
-export const getUnauthentifiedUserFromCookie = (request) =>
-  getUserFromCookie(request, { noRedirect: true });
+export const getUnauthentifiedUserFromCookie = (request) => getUserFromCookie(request, { noRedirect: true });
 
 export const createUserSession = async (request, user, redirectTo = "/") => {
   const session = await getSession(request.headers.get("Cookie"));

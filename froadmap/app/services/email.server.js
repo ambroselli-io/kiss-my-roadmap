@@ -1,14 +1,7 @@
 import { Headers } from "@remix-run/node";
-import { TIPIMAIL_API_USER, TIPIMAIL_API_KEY, APP_NAME } from "../config";
+import { TIPIMAIL_API_USER, TIPIMAIL_API_KEY, APP_NAME } from "../config.server";
 
-export const sendEmail = async ({
-  emails = ["arnaud@ambroselli.io"],
-  text,
-  html,
-  subject,
-  from,
-  force = false,
-}) => {
+export const sendEmail = async ({ emails = ["arnaud@ambroselli.io"], text, html, subject, from, force = false }) => {
   if (process.env.NODE_ENV !== "production" && !force) return;
   return fetch("https://api.tipimail.com/v1/messages/send", {
     method: "POST",

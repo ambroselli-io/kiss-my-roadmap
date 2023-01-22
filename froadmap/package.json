@@ -1,8 +1,8 @@
 {
-  "name": "roadmap",
+  "name": "froadmap",
   "version": "0.0.1",
   "private": true,
-  "description": "",
+  "description": "Your features roadmap, but simple 💋",
   "license": "",
   "sideEffects": false,
   "scripts": {

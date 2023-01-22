@@ -3,6 +3,7 @@ import { redirect } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData } from "@remix-run/react";
 import ProjectModel from "~/db/models/project.server";
 import UserModel from "~/db/models/user.server";
+import { APP_NAME } from "~/config.client";
 
 export const action = async () => {
   console.log("action");
@@ -27,6 +28,14 @@ export const loader = async ({ request }) => {
   };
 };
 
+export const meta = () => {
+  return [
+    {
+      title: `My projects | ${APP_NAME}`,
+    },
+  ];
+};
+
 export default function Index() {
   const { projects, user } = useLoaderData();
   const newProjectFetcher = useFetcher();
@@ -34,14 +43,14 @@ export default function Index() {
   return (
     <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-hidden">
       <h1 className="m-4 text-3xl">Welcome to Roadmap, the table to make your roadmaps ! 🗺️</h1>
-      <main className="relative flex justify-start gap-16 overflow-auto p-16">
+      <main className="relative flex flex-wrap justify-start gap-16 overflow-auto p-16">
         {projects.map((project) => (
-          <div key={project._id} className="flex flex-col justify-between">
+          <div key={project._id} className="flex shrink-0 basis-1/4 flex-col justify-between">
             <div className="block max-w-sm rounded-lg bg-white p-6 drop-shadow-lg">
               <h5 className="mb-2 text-xl font-medium leading-tight text-gray-900">
                 {project.title || "Un futur projet de maboule"}
               </h5>
-              <p className="mb-4 text-base text-gray-700">
+              <p className="mb-4 max-h-24 overflow-y-auto text-base text-gray-700">
                 {(project.description || "Ya pas de description encore, mais ça ne saurait tarder ?")
                   ?.split("\n")
                   .map((sentence, index) => (
@@ -60,7 +69,11 @@ export default function Index() {
             </div>
           </div>
         ))}
-        <newProjectFetcher.Form method="post" id="new-form" className="flex flex-col items-stretch justify-between">
+        <newProjectFetcher.Form
+          method="post"
+          id="new-form"
+          className="flex shrink-0 basis-1/4 flex-col items-stretch justify-between"
+        >
           <div className="block max-w-sm rounded-lg bg-white p-6 drop-shadow-lg">
             <h5 className="mb-2 text-xl font-medium leading-tight text-gray-900">+ Nouveau projet</h5>
             <p className="mb-4 text-base text-gray-700">Cliquez ici pour commencer un nouveau projet !</p>

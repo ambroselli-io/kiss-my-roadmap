@@ -8,7 +8,7 @@ import resetStyles from "./styles/reset.css";
 import fontFace from "./styles/font.css";
 import smoothscroll from "smoothscroll-polyfill";
 import dialogPolyfillCSS from "dialog-polyfill/dist/dialog-polyfill.css";
-import { APP_DESCRIPTION, APP_NAME } from "./services/appName";
+import { APP_DESCRIPTION, APP_NAME } from "./config.client";
 // import resolveConfig from "tailwindcss/resolveConfig";
 // import tailwindConfig from "../tailwind.config.js";
 // const fullConfig = resolveConfig(tailwindConfig);
@@ -20,36 +20,53 @@ if (typeof document !== "undefined") {
   smoothscroll.polyfill();
 }
 
-export const meta = () => ({
-  charset: "utf-8",
-  viewport: "width=device-width,initial-scale=1",
-  // "theme-color": fullConfig.theme.colors.app,
-  "theme-color": "#fafbfe",
-  title: `${APP_NAME} | ${APP_DESCRIPTION}`,
-  description: `${APP_NAME} | ${APP_DESCRIPTION}`,
-  "og:title": `${APP_NAME}`,
-  "og:description": APP_DESCRIPTION,
-  "twitter:title": `${APP_NAME}`,
-  "twitter:description": APP_DESCRIPTION,
-  // "og:url": { APP_URL },
-  // canonical: { APP_URL },
-  // "og:image": "/assets/icons/og-image-1200-630.png",
-  // "og:image:secure_url": `${APP_URL}/assets/icons/og-image-1200-630.png`,
-  // "twitter:image": "/assets/icons/og-image-1200-630.png",
-  // "og:image:type": "image/png",
-  // "og:image:width": "1200",
-  // "og:image:height": "630",
-  // "og:image:alt": "My og image",
-  // "twitter:image:alt": "My og image",
-  // "og:type": "website",
-  // "msapplication-square70x70logo": "/assets/icons/mstile-icon-128.png",
-  // "msapplication-square150x150logo": "/assets/icons/mstile-icon-270.png",
-  // "msapplication-square310x310logo": "/assets/icons/mstile-icon-558.png",
-  // "msapplication-wide310x150logo": "/assets/icons/mstile-icon-558-270.png",
-  // "apple-mobile-web-app-capable": "yes",
-  // "mobile-web-app-capable": "yes",
-  // "apple-mobile-web-app-status-bar-style": fullConfig.theme.colors.app,
-});
+export const meta = () => {
+  return [
+    { title: `${APP_NAME} | ${APP_DESCRIPTION}` },
+    {
+      name: "viewport",
+      content: "width=device-width,initial-scale=1",
+    },
+    { name: "theme-color", content: "#fafbfe" },
+    { name: "description", content: `${APP_NAME} | ${APP_DESCRIPTION}` },
+    { property: "og:title", content: `${APP_NAME}` },
+    { property: "og:description", content: APP_DESCRIPTION },
+    { property: "twitter:title", content: `${APP_NAME}` },
+    { property: "twitter:description", content: APP_DESCRIPTION },
+    // { property: "og:url", content: { APP_URL } },
+    // { property: "canonical", content: { APP_URL } },
+    // { property: "og:image", content: "/assets/icons/og-image-1200-630.png" },
+    // { property: "og:image:secure_url", content: `${APP_URL}/assets/icons/og-image-1200-630.png` },
+    // { property: "twitter:image", content: "/assets/icons/og-image-1200-630.png" },
+    // { property: "og:image:type", content: "image/png" },
+    // { property: "og:image:width", content: "1200" },
+    // { property: "og:image:height", content: "630" },
+    // { property: "og:image:alt", content: "My og image" },
+    // { property: "twitter:image:alt", content: "My og image" },
+    // { property: "og:type", content: "website" },
+    // { property: "msapplication-square70x70logo", content: "/assets/icons/mstile-icon-128.png" },
+    // { property: "msapplication-square150x150logo", content: "/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-square310x310logo", content: "/assets/icons/mstile-icon-558.png" },
+    // { property: "msapplication-wide310x150logo", content: "/assets/icons/mstile-icon-558-270.png" },
+    // { property: "apple-mobile-web-app-capable", content: "yes" },
+    // { property: "mobile-web-app-capable", content: "yes" },
+    // { property: "apple-mobile-web-app-status-bar-style", content: fullConfig.theme.colors.app },
+    // { property: "apple-mobile-web-app-title", content: APP_NAME },
+    // { property: "application-name", content: APP_NAME },
+    // { property: "msapplication-TileColor", content: fullConfig.theme.colors.app },
+    // { property: "msapplication-TileImage", content: "/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-config", content: "/browserconfig.xml" },
+    // { property: "msapplication-tooltip", content: APP_DESCRIPTION },
+    // { property: "msapplication-starturl", content: "/" },
+    // { property: "msapplication-navbutton-color", content: fullConfig.theme.colors.app },
+    // { property: "msapplication-task", content: "name=Home;action-uri=/;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=About;action-uri=/about;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Contact;action-uri=/contact;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Blog;action-uri=/blog;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Projects;action-uri=/projects;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Services;action-uri=/services;icon-uri=/assets/icons/mstile-icon-270.png" },
+  ];
+};
 
 // load browser env variables here, the inject in the script below
 export const loader = () => ({

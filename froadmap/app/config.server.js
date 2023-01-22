@@ -1,5 +1,9 @@
+import { name, description } from "../package.json";
+const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
 const MONGO_URL = process.env.MONGODB_ADDON_URI;
-const APP_NAME = "Roadmap";
+const APP_NAME = capitalizeFirstLetter(name);
+const APP_DESCRIPTION = description;
 const MONGODB_DB_NAME = APP_NAME;
 const APP_URL = process.env.APP_URL;
 const PORT = process.env.PORT || 8080;
@@ -23,6 +27,7 @@ export {
   MONGO_URL,
   APP_URL,
   APP_NAME,
+  APP_DESCRIPTION,
   PORT,
   SECRET,
   ENVIRONMENT,

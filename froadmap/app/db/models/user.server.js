@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import dbConnection from "../mongo.server";
+import { availableHelp } from "~/utils/help.server";
 const MODELNAME = "User";
 
 const Schema = new mongoose.Schema(
@@ -17,22 +18,20 @@ const Schema = new mongoose.Schema(
     name: { type: String },
     job: { type: String },
     urlOrigin: { type: String },
-    organisations: [{ type: mongoose.Schema.Types.ObjectId, ref: "Organisation" }],
-    // devCostsSettings: {
-    //   type: {
-    //     scale: { type: [String], enum: [
-    //       ["XS", "S", "M", "L", "XL"],
-    //       ["XS", "S", "M", "L", "XL", "XXL"],
-    //     ] },
-    //     equivalentHours: { type: [Number] },
-    //     equivalentPrice: { type: [Number] },
-    //   },
-    //   default: {
-    //     scale: ["XS", "S", "M", "L", "XL"],
-    //     equivalentHours: [1, 4, 8, 20, 40],
-    //     equivalentPrice: [100, 400, 800, 2000, 4000],
-    //   },
-    // },
+    organisations: [
+      {
+        organisation: { type: mongoose.Schema.Types.ObjectId, ref: "Organisation" },
+        role: { type: String, enum: ["admin", "member"] },
+        canCreate: { type: Boolean, default: false },
+        canRead: { type: Boolean, default: false },
+        canUpdate: { type: Boolean, default: false },
+        canDelete: { type: Boolean, default: false },
+      },
+    ],
+    helpSettings: {
+      type: [],
+      default: availableHelp,
+    },
   },
   { timestamps: true }
 );
@@ -43,7 +42,9 @@ Schema.methods.me = function () {
     firstName: this.firstName,
     lastName: this.lastName,
     job: this.job,
+    email: this.email,
     organisations: this.organisations,
+    helpSettings: this.helpSettings,
   };
 };
 

@@ -6,8 +6,11 @@ import { useMemo, useCallback } from "react";
 import { appendScore, getScore } from "~/utils/score";
 import { sortFeatures } from "~/utils/sort";
 import OpenTrash from "~/components/OpenTrash";
+import { HelpBlock, MainHelpButton, helpAction } from "~/components/HelpBlock";
+import { getUserFromCookie } from "~/services/auth.server";
 
 export const action = async ({ request, params }) => {
+  const user = await getUserFromCookie();
   const formData = await request.formData();
   if (formData.get("action") === "sort") {
     const projectId = params.projectId;
@@ -18,6 +21,7 @@ export const action = async ({ request, params }) => {
     await project.save();
     return json({ ok: true });
   }
+
   if (formData.get("action") === "deleteFeature") {
     await FeatureModel.findByIdAndDelete(formData.get("featureId"));
     return json({ ok: true });
@@ -29,6 +33,11 @@ export const action = async ({ request, params }) => {
     if (formData.get("title")) project.title = formData.get("title");
     if (formData.get("description")) project.description = formData.get("description");
     await project.save();
+    return json({ ok: true });
+  }
+
+  if (formData.get("action") === "helpSettings") {
+    await helpAction({ user, formData });
     return json({ ok: true });
   }
 
@@ -75,6 +84,7 @@ export const action = async ({ request, params }) => {
 };
 
 export const loader = async ({ request, params }) => {
+  const user = await getUserFromCookie();
   const projectId = params.projectId;
   const project = await ProjectModel.findById(projectId);
   const features = await FeatureModel.find({ project: projectId, status: { $ne: "__new" } }).lean();
@@ -103,11 +113,40 @@ export const loader = async ({ request, params }) => {
     return {
       project,
       features: augmentedFeatures,
+      user,
     };
   } finally {
     project.sortedFeaturesIds = augmentedFeatures.map((f) => f._id);
     await project.save();
   }
+};
+
+export const meta = ({ data }) => {
+  return [
+    {
+      title: `${data.project?.title || "New project"} | Roadmap`,
+    },
+    {
+      name: "description",
+      content: data.project?.description || "No description yet",
+    },
+    {
+      name: "og:title",
+      content: `${data.project?.title || "New project"} | Roadmap`,
+    },
+    {
+      name: "og:description",
+      content: data.project?.description || "No description yet",
+    },
+    {
+      name: "twitter:title",
+      content: `${data.project?.title || "New project"} | Roadmap`,
+    },
+    {
+      name: "twitter:description",
+      content: data.project?.description || "No description yet",
+    },
+  ];
 };
 
 export default function Index() {
@@ -142,7 +181,10 @@ export default function Index() {
   return (
     <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto">
       <Outlet />
-      <main className="flex flex-1 basis-full flex-col justify-start pb-8">
+      <header className="flex justify-end px-8 py-2">
+        <MainHelpButton />
+      </header>
+      <main className="flex flex-1 basis-full flex-col justify-start pb-8 text-xs">
         <Form className="flex shrink-0 flex-col pb-10" onBlur={submitMetadata}>
           <input
             type="text"
@@ -151,30 +193,54 @@ export default function Index() {
             className="p-8 text-4xl font-bold"
             placeholder="Write here the title of your project. 🐉"
           />
-          <div className="relative h-min">
-            <div
-              aria-hidden={true}
-              className="pointer-events-none invisible min-h-[5rem] py-4 px-12"
-              placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
-            >
-              {project.description?.split("\n").map((item, key) => (
-                <span key={key}>
-                  {item}
-                  <br />
-                </span>
-              ))}
+          <div className="flex">
+            <div className="relative h-min grow">
+              <div
+                aria-hidden={true}
+                className="pointer-events-none invisible min-h-[5rem] py-4 px-12"
+                placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
+              >
+                {project.description?.split("\n").map((item, key) => (
+                  <span key={key}>
+                    {item}
+                    <br />
+                  </span>
+                ))}
+              </div>
+              <textarea
+                defaultValue={project.description}
+                name="description"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    submitMetadata(e);
+                  }
+                }}
+                className="absolute inset-0 h-full min-h-[5rem] w-full py-4 px-12"
+                placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
+              />
             </div>
-            <textarea
-              defaultValue={project.description}
-              name="description"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  submitMetadata(e);
-                }
-              }}
-              className="absolute inset-0 h-full min-h-[5rem] w-full py-4 px-12"
-              placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
-            />
+            <HelpBlock helpSetting="showRoadmapHelp" className="basis-1/2 !text-left !text-base">
+              <p>
+                Froadmap helps you optimize your product roadmap.
+                <br />
+                I know, there are plenty of tools out there, but this one is different.
+                <br />
+                The secret of this template: KISS 💋. In other words: Keep It Simple, Stupid.
+              </p>
+              <strong>
+                <ul className="list-inside list-disc">
+                  By keeping things simple, you can go fast on:
+                  <li>listing the features you can build</li>
+                  <li>which one are really worth it</li>
+                  <li>which one you should build first</li>
+                  <li>iterate cleverly on your product.</li>
+                </ul>
+              </strong>
+              <p>
+                Last but not least: don't build too much! At least not at the beginning of your journey. Don't forget to
+                launch your product, make users appreciate your features, and iterate on it.
+              </p>
+            </HelpBlock>
           </div>
         </Form>
         <div className="relative w-full max-w-full">
@@ -182,28 +248,28 @@ export default function Index() {
             aria-roledescription="Header of the list of features - Clicking on a column header can sort the feature by the column, ascending or descending"
             className="sticky top-0 z-50 grid grid-cols-features"
           >
-            <div className="flex items-start justify-center border-l-0 border-r-2 border-b-4 border-gray-900 bg-white py-4"></div>
-            <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex items-start justify-center border-r border-l-0 border-b-2 border-gray-900 bg-white py-4"></div>
+            <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <SortButton field="feature" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Features" field="feature" onClick={onNameClick} />
             </div>
-            <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <SortButton field="businessValue" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title="Business value" field="businessValue" onClick={onNameClick} />
+              <HeaderButton title={`🤑 Added value`} field="businessValue" onClick={onNameClick} />
             </div>
-            <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <SortButton field="devCost" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title="Development cost" field="devCost" onClick={onNameClick} />
+              <HeaderButton title={`💸 Production cost`} field="devCost" onClick={onNameClick} />
             </div>
-            <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <SortButton field="priority" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title="Priority" field="priority" onClick={onNameClick} />
+              <HeaderButton title={`❗️ Priority`} field="priority" onClick={onNameClick} />
             </div>
-            <div className="flex cursor-pointer border-y-4 border-x-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <SortButton field="score" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title="Score" field="score" onClick={onNameClick} />
+              <HeaderButton title={`💯\u00A0Score`} field="score" onClick={onNameClick} />
             </div>
-            <div className="flex cursor-pointer border-y-4 border-l-2 border-r-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+            <div className="flex cursor-pointer border-y-2 border-l border-r-2 border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <SortButton field="status" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
               <HeaderButton title="Status" field="status" onClick={onNameClick} />
             </div>
@@ -237,71 +303,103 @@ const Feature = ({ feature, index }) => {
       aria-label={feature.content}
       className="group grid grid-cols-features"
     >
-      {/* <div className="flex-shrink-0 flex-grow-0 basis-2 cursor-pointer border-x-2 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+      {/* <div className="flex-shrink-0 flex-grow-0 basis-2 cursor-pointer border-x border-b-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
                   <p className="m-0">{index}</p>
                 </div> */}
       <input type="hidden" name="featureId" defaultValue={feature._id} />
-      <div className="flex flex-col items-center justify-between border-l-4 border-r-2 border-b-4 border-gray-900 py-4">
+      <div className="flex flex-col items-center justify-between border-r border-l-4 border-b-2 border-gray-900 py-4">
         {index + 1}
-        <button
+        {/* <button
           type="submit"
           name="action"
           value="deleteFeature"
           className="opacity-0 transition-all group-hover:opacity-100"
         >
           <OpenTrash className="h-8 w-8 text-red-700" />
-        </button>
+        </button> */}
       </div>
-      <div className="cursor-pointer border-x-2 border-b-4 border-gray-900 bg-white text-left font-medium text-gray-900">
+      <div className="cursor-pointer border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         <textarea
-          type="textarea"
           defaultValue={feature.content}
           placeholder={
             feature.status === "__new" ? "You can type in a new feature here" : "Mmmmh it looks like you're pivoting..."
           }
           name="content"
-          className="h-full min-h-max w-full p-4"
+          className="h-full w-full p-1"
           onBlur={(e) => {
             featureFetcher.submit(e.target.form, { method: "post", replace: false });
           }}
         />
       </div>
-      <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         {feature.status !== "__new" && (
           <>
-            <p className="break-words text-center opacity-70">
-              How much value does this feature bring to the business?
-            </p>
+            {index === 0 && (
+              <HelpBlock helpSetting="showBusinessValueHelp">
+                <p>
+                  How much value does <wbr /> this feature bring? Is it really useful? For a lot of users? Will it make
+                  more people <wbr /> pay for your product?
+                  <br />
+                  High value: XL (5 points)
+                  <br />
+                  Low value: XS (1 point)
+                </p>
+              </HelpBlock>
+            )}
             <ButtonsXSToXL name="businessValue" feature={feature} featureFetcher={featureFetcher} />
           </>
         )}
       </div>
-      <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         {feature.status !== "__new" && (
           <>
-            <p className="break-words text-center opacity-70">How much does it cost to develop this feature?</p>
+            {index === 0 && (
+              <HelpBlock helpSetting="showDevCostHelp">
+                <p>
+                  Every feature has its trade off. Building new stuff is never free. How much does it cost to develop
+                  this feature?
+                  <br />
+                  High cost: XL (1 point)
+                  <br />
+                  Low cost: XS (5 points)
+                </p>
+              </HelpBlock>
+            )}
             <ButtonsXSToXL name="devCost" feature={feature} featureFetcher={featureFetcher} />
           </>
         )}
       </div>
-      <div className="flex flex-col items-stretch justify-center gap-2 border-x-2 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         {feature.status !== "__new" && (
           <>
-            <p className="break-words text-center opacity-70">
-              Use this to help you prioritize your features: if you really want it, give it a YES.
-            </p>
+            {index === 0 && (
+              <HelpBlock helpSetting="showPriorityHelp">
+                <p>
+                  Use this to help you prioritize your features: if you really want it, whatever cost/value, give it a
+                  YES. It will multiply the score by 5.
+                </p>
+              </HelpBlock>
+            )}
             <ButtonsYesNo name="priority" feature={feature} featureFetcher={featureFetcher} />
           </>
         )}
       </div>
-      <div className="border-x-2 border-b-4 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
+      <div className="border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         {feature.status !== "__new" && (
           <>
+            {index === 0 && (
+              <HelpBlock helpSetting="showScoreHelp" className="help-score peer">
+                <p>
+                  Simple formula: business value + production cost. The higher the score, the more you should build it.
+                  If you toggle the priority, the score will be multiplied by 5.
+                </p>
+              </HelpBlock>
+            )}
             <Score feature={feature} featureFetcher={featureFetcher} />
           </>
         )}
       </div>
-      <div className="flex flex-col items-stretch justify-center gap-2 border-l-2 border-r-4 border-b-4 border-gray-900 bg-white py-2 text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-l border-r-2 border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         {feature.status !== "__new" && (
           <>
             <ButtonsSatus name="status" feature={feature} featureFetcher={featureFetcher} />
@@ -329,7 +427,7 @@ const HeaderButton = ({ title, field, onClick }) => {
 const SortButton = ({ field, onClick, sortOrder, sortBy }) => {
   if (sortBy !== field) return null;
   return (
-    <button className="mr-4" onClick={onClick} type="button" aria-label="Changer l'ordre de tri" data-sortkey={field}>
+    <button className="mr-2" onClick={onClick} type="button" aria-label="Changer l'ordre de tri" data-sortkey={field}>
       <span>
         {sortOrder === "ASC" && `\u00A0\u2193`}
         {sortOrder === "DESC" && `\u00A0\u2191`}
@@ -352,7 +450,7 @@ const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
   }, [feature, name, featureFetcher]);
 
   return (
-    <div className="flex gap-1 px-1">
+    <div className="flex gap-1 px-1 py-2">
       <button
         className={[
           selected === "XS"
@@ -446,7 +544,7 @@ const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
   }, [feature, name, featureFetcher]);
 
   return (
-    <div className="flex justify-center gap-1 px-1">
+    <div className="flex justify-center gap-1 px-1 py-2">
       <button
         className={[
           selected === "YES"
@@ -496,7 +594,7 @@ const ButtonsSatus = ({ feature, name, featureFetcher }) => {
   }, [feature, name, featureFetcher]);
 
   return (
-    <div className="flex flex-col items-center gap-1 px-1">
+    <div className="flex flex-wrap items-center gap-1 p-1">
       <button
         className={[
           selected === "TODO" ? "bg-blue-700 text-white" : "",
@@ -588,5 +686,5 @@ const Score = ({ feature, featureFetcher }) => {
     }
     return feature.score;
   }, [feature, featureFetcher]);
-  return <span>{score}</span>;
+  return <p className="flex h-full w-full items-center justify-center peer-[.help-score]:h-auto">{score}</p>;
 };

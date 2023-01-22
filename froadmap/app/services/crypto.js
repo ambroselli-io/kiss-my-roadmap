@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { SECRET } from "../config";
+import { SECRET } from "../config.server";
 
 const algorithm = "aes-256-ctr";
 
@@ -23,9 +23,6 @@ export const decrypt = (text) => {
   const iv = Buffer.from(ivPart, "hex");
   const encryptedText = Buffer.from(encryptedPart, "hex");
   const decipher = crypto.createDecipheriv(algorithm, ENCRYPTION_KEY, iv);
-  const decrypted = Buffer.concat([
-    decipher.update(encryptedText),
-    decipher.final(),
-  ]);
+  const decrypted = Buffer.concat([decipher.update(encryptedText), decipher.final()]);
   return decrypted.toString();
 };

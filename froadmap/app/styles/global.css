@@ -10,3 +10,14 @@ input[type="radio"] {
 .debug * {
   border: 2px solid black;
 }
+
+:root {
+  --scoreWidthToggleWithHelp: 1.5fr;
+}
+html:has(.help-score) {
+  --scoreWidthToggleWithHelp: 4fr;
+}
+
+.help-block p {
+  line-break: loose;
+}

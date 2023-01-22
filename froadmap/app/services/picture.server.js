@@ -4,7 +4,7 @@ const {
   CELLAR_ADDON_KEY_ID,
   CELLAR_ADDON_KEY_SECRET,
   PUBLIC_BUCKET_NAME,
-} = require("../config");
+} = require("../config.server");
 
 export const uploadPublicPictureFromBuffer = async ({
   buffer,

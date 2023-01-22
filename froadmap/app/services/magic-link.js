@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { APP_NAME, APP_URL, SECRET } from "app/config";
+import { APP_NAME, APP_URL, SECRET } from "~/config.server";
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "../../tailwind.config";
 const fullConfig = resolveConfig(tailwindConfig);
@@ -87,9 +87,7 @@ P.S. Si vous n'avez pas demandé à recevoir cet email, vous pouvez l'ignorer.
     .replace(
       "{WELCOME_MESSAGE}",
       userExists
-        ? `Bonjour ${
-            user?.firstName ? `${user?.firstName} !` : "!"
-          } Heureux de vous revoir sur ${APP_NAME}!`
+        ? `Bonjour ${user?.firstName ? `${user?.firstName} !` : "!"} Heureux de vous revoir sur ${APP_NAME}!`
         : `Bienvenue sur ${APP_NAME} !`
     );
 
