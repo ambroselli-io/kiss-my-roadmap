@@ -18,13 +18,13 @@ export const StatusesFilter = () => {
 
   return (
     <DropdownMenu
-      className="-my-2 [&_.menu-button.hide-menu]:italic [&_.menu-button.hide-menu]:opacity-50 [&_.menu-container]:right-0 [&_.menu-container]:left-[unset] [&_.menu-container]:w-[unset]"
+      className="-my-2 hidden md:block [&_.menu-container]:right-0 [&_.menu-container]:left-[unset] [&_.menu-container]:w-[unset] [&_.menu-button.hide-menu]:italic [&_.menu-button.hide-menu]:opacity-50 [&_button]:-mr-2"
       title={`Filter${filteredStatuses.length ? ` (${filteredStatuses.length})` : ""}...`}
     >
       <statusFilterFetcher.Form method="post" id="status-filter" className="status-filter flex flex-col items-start">
         <input type="hidden" name="action" value="filter" />
         <button
-          className={["!p-1 !pr-4", filteredStatuses.includes("TODO") ? "line-through" : ""].join(" ")}
+          className={["!r-2 !p-1", filteredStatuses.includes("TODO") ? "line-through" : ""].join(" ")}
           type="submit"
           form="status-filter"
           name="status"

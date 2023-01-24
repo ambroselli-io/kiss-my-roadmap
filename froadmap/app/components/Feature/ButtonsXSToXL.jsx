@@ -1,7 +1,19 @@
 import { useMemo } from "react";
 
-export const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
+export const ButtonsXSToXL = ({ feature, name, featureFetcher, form, className = "", debug }) => {
   const selected = useMemo(() => {
+    if (debug) {
+      console.log(
+        `["loading", "submitting"].includes(featureFetcher.state)`,
+        ["loading", "submitting"].includes(featureFetcher.state)
+      );
+      console.log(
+        `featureFetcher.submission?.formData?.get("featureId")`,
+        featureFetcher.submission?.formData?.get("featureId")
+      );
+      console.log("feature?._id", feature?._id);
+      console.log(featureFetcher.submission?.formData?.get("featureId") !== feature?._id);
+    }
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
       const newValue = featureFetcher.submission.formData?.get(name);
@@ -11,21 +23,21 @@ export const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
       }
     }
     return feature[name];
-  }, [feature, name, featureFetcher]);
-
+  }, [feature, name, featureFetcher, debug]);
+  if (debug) console.log("selected", selected);
   return (
-    <div className="flex gap-1 px-1 py-2">
+    <div className={["flex flex-row gap-1 px-1 py-2", className].join(" ")}>
       <button
         className={[
           selected === "XS"
             ? "bg-green-700 text-white"
             : "border-opacity-40 bg-green-200 bg-opacity-40 text-green-700 text-opacity-40",
-          "active:!bg-green-700 active:!text-white",
-          "flex-1 rounded border-2 border-green-700",
+          "border-green-700 active:!bg-green-700 active:!text-white",
+          "flex-1 rounded border-2",
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="XS"
       >
         XS
@@ -35,12 +47,12 @@ export const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
           selected === "S"
             ? "bg-green-600 text-white"
             : "border-opacity-40 bg-green-100 bg-opacity-40 text-green-600 text-opacity-40",
-          "active:!bg-green-600 active:!text-white",
-          "flex-1 rounded border-2 border-green-600",
+          "border-green-600 active:!bg-green-600 active:!text-white",
+          "flex-1 rounded border-2",
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="S"
       >
         S
@@ -50,12 +62,12 @@ export const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
           selected === "M"
             ? "bg-gray-600 text-white"
             : "border-opacity-40 bg-gray-100 bg-opacity-40 text-gray-600 text-opacity-40",
-          "active:!bg-gray-600 active:!text-white",
-          "flex-1 rounded border-2 border-gray-600",
+          "border-gray-600 active:!bg-gray-600 active:!text-white",
+          "flex-1 rounded border-2",
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="M"
       >
         M
@@ -65,12 +77,12 @@ export const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
           selected === "L"
             ? "bg-red-600 text-white"
             : "border-opacity-40 bg-red-100 bg-opacity-40 text-red-600 text-opacity-40",
-          "active:!bg-red-600 active:!text-white",
-          "flex-1 rounded border-2 border-red-600",
+          "border-red-600 active:!bg-red-600 active:!text-white",
+          "flex-1 rounded border-2",
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="L"
       >
         L
@@ -80,12 +92,12 @@ export const ButtonsXSToXL = ({ feature, name, featureFetcher }) => {
           selected === "XL"
             ? "bg-red-700 text-white"
             : "border-opacity-40 bg-red-200 bg-opacity-40 text-red-700 text-opacity-40",
-          "active:!bg-red-700 active:!text-white",
-          "flex-1 rounded border-2 border-red-700",
+          "border-red-700 active:!bg-red-700 active:!text-white",
+          "flex-1 rounded border-2",
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="XL"
       >
         XL

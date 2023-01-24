@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 
-export const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
+export const ButtonsSatus = ({ feature, name = "status", featureFetcher, form, className = "" }) => {
   const selected = useMemo(() => {
+    if (feature.status === "__new") return "NOTREADYYET";
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
       const newValue = featureFetcher.submission.formData?.get(name);
@@ -14,7 +15,7 @@ export const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
   }, [feature, name, featureFetcher]);
 
   return (
-    <div className="flex flex-wrap items-center gap-1 p-1">
+    <div className={["flex flex-wrap items-center gap-1 p-1", className].join(" ")}>
       <button
         className={[
           selected === "TODO" ? "bg-blue-700 text-white" : "",
@@ -25,7 +26,7 @@ export const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="TODO"
       >
         To do
@@ -40,7 +41,7 @@ export const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="INPROGRESS"
       >
         In progress
@@ -55,7 +56,7 @@ export const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="NOTREADYYET"
       >
         Not ready yet
@@ -70,7 +71,7 @@ export const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="DONE"
       >
         Done
@@ -85,7 +86,7 @@ export const ButtonsSatus = ({ feature, name = "status", featureFetcher }) => {
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="KO"
       >
         KO

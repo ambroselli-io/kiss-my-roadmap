@@ -40,10 +40,10 @@ export default function Index() {
   return (
     <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-hidden">
       <h1 className="m-4 text-3xl">Welcome to Roadmap, the table to make your roadmaps ! 🗺️</h1>
-      <main className="relative flex flex-wrap justify-start gap-16 overflow-auto p-16">
+      <main className="relative flex flex-wrap justify-center gap-4 overflow-auto p-4 md:justify-start md:gap-16 md:p-16">
         {projects.map((project) => (
-          <div key={project._id} className="flex shrink-0 basis-1/4 flex-col justify-between">
-            <div className="block max-w-sm rounded-lg bg-white p-6 drop-shadow-lg">
+          <div key={project._id} className="flex shrink-0 basis-full flex-col justify-between md:basis-1/4">
+            <div className="m-auto block w-full max-w-sm rounded-lg bg-white p-6 drop-shadow-lg md:m-0">
               <h5 className="mb-2 text-xl font-medium leading-tight text-gray-900">
                 {project.title || "Un futur projet de maboule"}
               </h5>
@@ -69,9 +69,9 @@ export default function Index() {
         <newProjectFetcher.Form
           method="post"
           id="new-form"
-          className="flex shrink-0 basis-1/4 flex-col items-stretch justify-between"
+          className="flex shrink-0 basis-full flex-col justify-between md:basis-1/4"
         >
-          <div className="block max-w-sm rounded-lg bg-white p-6 drop-shadow-lg">
+          <div className="m-auto block w-full max-w-sm rounded-lg bg-white p-6 drop-shadow-lg md:m-0">
             <h5 className="mb-2 text-xl font-medium leading-tight text-gray-900">+ Nouveau projet</h5>
             <p className="mb-4 text-base text-gray-700">Cliquez ici pour commencer un nouveau projet !</p>
             <button

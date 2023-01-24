@@ -6,33 +6,36 @@ import { ButtonsSatus } from "./ButtonsSatus";
 import { ButtonsYesNo } from "./ButtonsYesNo";
 import { ButtonsXSToXL } from "./ButtonsXSToXL";
 
-export const FeatureRow = ({ feature, index }) => {
-  const featureFetcher = useFetcher();
+export const FeatureRow = ({ feature, index, className }) => {
+  const featureRowFetcher = useFetcher();
+
+  const formId = `feature-row-${feature._id}`;
 
   if (
-    featureFetcher?.submission?.formData?.get("featureId") === feature._id &&
-    featureFetcher?.submission?.formData?.get("action") === "deleteFeature"
+    featureRowFetcher?.submission?.formData?.get("featureId") === feature._id &&
+    featureRowFetcher?.submission?.formData?.get("action") === "deleteFeature"
   ) {
     return null;
   }
 
   return (
-    <featureFetcher.Form
+    <featureRowFetcher.Form
       method="post"
       replace
       reloadDocument={false}
-      id={`feature-${feature._id}`}
+      id={formId}
       key={feature._id}
       aria-label={feature.content}
       className={[
         "group grid grid-cols-features",
         feature.status === "__new" ? "[&_button]:pointer-events-none" : "",
+        className,
       ].join(" ")}
     >
       {/* <div className="flex-shrink-0 flex-grow-0 basis-2 cursor-pointer border-x border-b-2 border-gray-900 bg-white p-4 text-left font-medium text-gray-900">
                   <p className="m-0">{index}</p>
                 </div> */}
-      <input type="hidden" name="featureId" defaultValue={feature._id} />
+      <input type="hidden" name="featureId" form={formId} defaultValue={feature._id} />
       <div className="flex flex-col items-center justify-between border-r border-l-2 border-b-2 border-gray-900 pt-1">
         {index + 1}
         <button
@@ -54,9 +57,10 @@ export const FeatureRow = ({ feature, index }) => {
             feature.status === "__new" ? "You can type in a new feature here" : "Mmmmh it looks like you're pivoting..."
           }
           name="content"
+          form={formId}
           className="h-full w-full p-1"
           onBlur={(e) => {
-            featureFetcher.submit(e.target.form, { method: "post", replace: false });
+            featureRowFetcher.submit(e.target.form, { method: "post", replace: false });
           }}
         />
       </div>
@@ -74,7 +78,7 @@ export const FeatureRow = ({ feature, index }) => {
               </p>
             </HelpBlock>
           )}
-          <ButtonsXSToXL name="businessValue" feature={feature} featureFetcher={featureFetcher} />
+          <ButtonsXSToXL form={formId} name="businessValue" feature={feature} featureFetcher={featureRowFetcher} />
         </>
       </div>
       <div className="flex flex-col items-stretch justify-center gap-2 border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
@@ -91,7 +95,7 @@ export const FeatureRow = ({ feature, index }) => {
               </p>
             </HelpBlock>
           )}
-          <ButtonsXSToXL name="devCost" feature={feature} featureFetcher={featureFetcher} />
+          <ButtonsXSToXL form={formId} name="devCost" feature={feature} featureFetcher={featureRowFetcher} />
         </>
       </div>
       <div className="flex flex-col items-stretch justify-center gap-2 border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
@@ -106,7 +110,7 @@ export const FeatureRow = ({ feature, index }) => {
               </p>
             </HelpBlock>
           )}
-          <ButtonsYesNo name="priority" feature={feature} featureFetcher={featureFetcher} />
+          <ButtonsYesNo form={formId} name="priority" feature={feature} featureFetcher={featureRowFetcher} />
         </>
       </div>
       <div className="border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
@@ -119,12 +123,12 @@ export const FeatureRow = ({ feature, index }) => {
               </p>
             </HelpBlock>
           )}
-          <Score feature={feature} featureFetcher={featureFetcher} />
+          <Score feature={feature} featureFetcher={featureRowFetcher} className="justify-center" />
         </>
       </div>
       <div className="flex flex-col items-stretch justify-center gap-2 border-l border-r-2 border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
-        <ButtonsSatus feature={feature} featureFetcher={featureFetcher} />
+        <ButtonsSatus form={formId} feature={feature} featureFetcher={featureRowFetcher} />
       </div>
-    </featureFetcher.Form>
+    </featureRowFetcher.Form>
   );
 };

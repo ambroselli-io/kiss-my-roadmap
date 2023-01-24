@@ -1,8 +1,8 @@
+import React, { useCallback, useState } from "react";
 import { Form, Link, Outlet, useLoaderData, useSubmit } from "@remix-run/react";
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
 import { json, redirect } from "@remix-run/node";
-import { useCallback } from "react";
 import { appendScore } from "~/utils/score";
 import { sortFeatures } from "~/utils/sort";
 import { HelpBlock, MainHelpButton, helpAction } from "~/components/HelpBlock";
@@ -12,6 +12,7 @@ import { SortButton } from "~/components/Feature/SortButton";
 import { FeatureRow } from "~/components/Feature/FeatureRow";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import OpenTrash from "~/components/OpenTrash";
+import { FeatureCard } from "~/components/Feature/FeatureCard";
 
 export const action = async ({ request, params }) => {
   const user = await getUserFromCookie();
@@ -209,11 +210,13 @@ export default function Index() {
     [sortBy, sortOrder, submit]
   );
 
+  const [editTitle, setEditTitle] = useState(!project.title);
   const submitMetadata = (e) => {
     const formData = new FormData();
     formData.append("action", "updateProject");
     formData.append(e.target.name, e.target.value);
     submit(formData, { method: "POST", replace: true });
+    setEditTitle(false);
   };
 
   return (
@@ -249,13 +252,24 @@ export default function Index() {
       </header>
       <main className="flex flex-1 basis-full flex-col justify-start pb-8 text-xs">
         <Form className="flex shrink-0 flex-col pb-10" onBlur={submitMetadata}>
-          <input
-            type="text"
-            name="title"
-            defaultValue={project.title}
-            className="p-8 text-4xl font-bold"
-            placeholder="Write here the title of your project. 🐉"
-          />
+          {editTitle ? (
+            <input
+              type="text"
+              name="title"
+              defaultValue={project.title}
+              className="p-8 text-4xl font-bold"
+              placeholder="Write here the title of your project. 🐉"
+            />
+          ) : (
+            <h1
+              className="cursor-pointer p-8 text-4xl font-bold"
+              onClick={() => {
+                setEditTitle(true);
+              }}
+            >
+              {project.title}
+            </h1>
+          )}
           <div className="flex">
             <div className="relative h-min grow">
               <div
@@ -309,39 +323,54 @@ export default function Index() {
         <div className="relative w-full max-w-full">
           <div
             aria-roledescription="Header of the list of features - Clicking on a column header can sort the feature by the column, ascending or descending"
-            className="sticky top-0 z-50 grid grid-cols-features"
+            className="sticky top-0 z-50 hidden grid-cols-features md:grid"
           >
             <div className="flex items-start justify-center border-r border-l-0 border-b-2 border-gray-900 bg-white py-4"></div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
-              <SortButton field="feature" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title="Features" field="feature" onClick={onNameClick} />
+              <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
+                <SortButton field="feature" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`Features`} field="feature" onClick={onNameClick} />
+              </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
-              <SortButton field="businessValue" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title={`🤑 Added value`} field="businessValue" onClick={onNameClick} />
+              <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
+                <SortButton field="businessValue" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`🤑\u00A0Added\u00A0value`} field="businessValue" onClick={onNameClick} />
+              </div>
+            </div>
+            <div className="cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900 md:flex">
+              <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
+                <SortButton field="devCost" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`💸\u00A0Production\u00A0cost`} field="devCost" onClick={onNameClick} />
+              </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
-              <SortButton field="devCost" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title={`💸 Production cost`} field="devCost" onClick={onNameClick} />
+              <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
+                <SortButton field="priority" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`❗️\u00A0Priority`} field="priority" onClick={onNameClick} />
+              </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
-              <SortButton field="priority" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title={`❗️ Priority`} field="priority" onClick={onNameClick} />
-            </div>
-            <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
-              <SortButton field="score" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <HeaderButton title={`💯\u00A0Score`} field="score" onClick={onNameClick} />
+              <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
+                <SortButton field="score" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`💯\u00A0Score`} field="score" onClick={onNameClick} />
+              </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-l border-r-2 border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
-              <SortButton field="status" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-              <div className="flex basis-full justify-between">
-                <HeaderButton title="Status" field="status" onClick={onNameClick} />
-                <StatusesFilter />
+              <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
+                <SortButton field="status" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <div className="flex basis-full justify-between">
+                  <HeaderButton title="Status" field="status" onClick={onNameClick} />
+                  <StatusesFilter />
+                </div>
               </div>
             </div>
           </div>
           {features.map((feature, index) => (
-            <FeatureRow key={feature._id} feature={feature} index={index} />
+            <React.Fragment key={feature._id}>
+              <FeatureRow feature={feature} index={index} className="hidden md:grid" />
+              <FeatureCard feature={feature} index={index} className="md:hidden" />
+            </React.Fragment>
           ))}
         </div>
       </main>

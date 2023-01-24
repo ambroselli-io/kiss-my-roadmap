@@ -35,7 +35,7 @@ export const HelpBlock = ({ children, helpSetting, className = "" }) => {
   return (
     <div
       className={[
-        "help-block relative m-2 rounded border-2 border-yellow-400 bg-yellow-100 p-2 text-center text-gray-400",
+        "help-block relative m-2 hidden rounded border-2 border-yellow-400 bg-yellow-100 p-2 text-center text-gray-400 md:block",
         className,
       ].join(" ")}
     >
@@ -83,7 +83,7 @@ export const MainHelpButton = ({ className }) => {
   }, [transition, user]);
 
   return (
-    <button type="button" className={className} onClick={onShowAllHelp}>
+    <button type="button" className={["hidden md:inline-block", className].join(" ")} onClick={onShowAllHelp}>
       {caption}
     </button>
   );

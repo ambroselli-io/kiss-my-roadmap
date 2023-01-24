@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-export const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
+export const ButtonsYesNo = ({ feature, name, form, featureFetcher }) => {
   const selected = useMemo(() => {
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
@@ -14,7 +14,7 @@ export const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
   }, [feature, name, featureFetcher]);
 
   return (
-    <div className="flex justify-center gap-1 px-1 py-2">
+    <div className="flex flex-row justify-center gap-1 px-1 py-2">
       <button
         className={[
           selected === "YES"
@@ -25,7 +25,7 @@ export const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="YES"
       >
         YES
@@ -41,7 +41,7 @@ export const ButtonsYesNo = ({ feature, name, featureFetcher }) => {
         ].join(" ")}
         name={name}
         type="submit"
-        form={`feature-${feature._id}`}
+        form={form}
         value="NO"
       >
         NO

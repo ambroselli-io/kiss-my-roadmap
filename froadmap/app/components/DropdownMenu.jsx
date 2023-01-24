@@ -18,7 +18,7 @@ export const DropdownMenu = ({ children, title, className }) => {
         type="button"
         onClick={() => setOpenMenu((f) => !f)}
         className={[
-          "menu-button block h-full px-4 text-xs",
+          "menu-button block h-full px-4 py-2 text-xs",
           showMenu ? "show-menu bg-black text-white" : "hide-menu",
         ].join(" ")}
       >

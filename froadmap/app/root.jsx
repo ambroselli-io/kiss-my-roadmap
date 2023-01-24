@@ -8,7 +8,8 @@ import resetStyles from "./styles/reset.css";
 import fontFace from "./styles/font.css";
 import smoothscroll from "smoothscroll-polyfill";
 import dialogPolyfillCSS from "dialog-polyfill/dist/dialog-polyfill.css";
-import { APP_DESCRIPTION, APP_NAME } from "./config.client";
+import * as configClient from "./config.client";
+import * as configServer from "./config.server";
 // import resolveConfig from "tailwindcss/resolveConfig";
 // import tailwindConfig from "../tailwind.config.js";
 // const fullConfig = resolveConfig(tailwindConfig);
@@ -19,54 +20,6 @@ dayjs.extend(advancedFormat);
 if (typeof document !== "undefined") {
   smoothscroll.polyfill();
 }
-
-export const meta = () => {
-  return [
-    { title: `${APP_NAME} | ${APP_DESCRIPTION}` },
-    {
-      name: "viewport",
-      content: "width=device-width,initial-scale=1",
-    },
-    { name: "theme-color", content: "#fafbfe" },
-    { name: "description", content: `${APP_NAME} | ${APP_DESCRIPTION}` },
-    { property: "og:title", content: `${APP_NAME}` },
-    { property: "og:description", content: APP_DESCRIPTION },
-    { property: "twitter:title", content: `${APP_NAME}` },
-    { property: "twitter:description", content: APP_DESCRIPTION },
-    // { property: "og:url", content: { APP_URL } },
-    // { property: "canonical", content: { APP_URL } },
-    // { property: "og:image", content: "/assets/icons/og-image-1200-630.png" },
-    // { property: "og:image:secure_url", content: `${APP_URL}/assets/icons/og-image-1200-630.png` },
-    // { property: "twitter:image", content: "/assets/icons/og-image-1200-630.png" },
-    // { property: "og:image:type", content: "image/png" },
-    // { property: "og:image:width", content: "1200" },
-    // { property: "og:image:height", content: "630" },
-    // { property: "og:image:alt", content: "My og image" },
-    // { property: "twitter:image:alt", content: "My og image" },
-    // { property: "og:type", content: "website" },
-    // { property: "msapplication-square70x70logo", content: "/assets/icons/mstile-icon-128.png" },
-    // { property: "msapplication-square150x150logo", content: "/assets/icons/mstile-icon-270.png" },
-    // { property: "msapplication-square310x310logo", content: "/assets/icons/mstile-icon-558.png" },
-    // { property: "msapplication-wide310x150logo", content: "/assets/icons/mstile-icon-558-270.png" },
-    // { property: "apple-mobile-web-app-capable", content: "yes" },
-    // { property: "mobile-web-app-capable", content: "yes" },
-    // { property: "apple-mobile-web-app-status-bar-style", content: fullConfig.theme.colors.app },
-    // { property: "apple-mobile-web-app-title", content: APP_NAME },
-    // { property: "application-name", content: APP_NAME },
-    // { property: "msapplication-TileColor", content: fullConfig.theme.colors.app },
-    // { property: "msapplication-TileImage", content: "/assets/icons/mstile-icon-270.png" },
-    // { property: "msapplication-config", content: "/browserconfig.xml" },
-    // { property: "msapplication-tooltip", content: APP_DESCRIPTION },
-    // { property: "msapplication-starturl", content: "/" },
-    // { property: "msapplication-navbutton-color", content: fullConfig.theme.colors.app },
-    // { property: "msapplication-task", content: "name=Home;action-uri=/;icon-uri=/assets/icons/mstile-icon-270.png" },
-    // { property: "msapplication-task", content: "name=About;action-uri=/about;icon-uri=/assets/icons/mstile-icon-270.png" },
-    // { property: "msapplication-task", content: "name=Contact;action-uri=/contact;icon-uri=/assets/icons/mstile-icon-270.png" },
-    // { property: "msapplication-task", content: "name=Blog;action-uri=/blog;icon-uri=/assets/icons/mstile-icon-270.png" },
-    // { property: "msapplication-task", content: "name=Projects;action-uri=/projects;icon-uri=/assets/icons/mstile-icon-270.png" },
-    // { property: "msapplication-task", content: "name=Services;action-uri=/services;icon-uri=/assets/icons/mstile-icon-270.png" },
-  ];
-};
 
 // load browser env variables here, the inject in the script below
 export const loader = () => ({
@@ -139,6 +92,58 @@ const App = () => {
   return (
     <html lang="en" className="w-screen overflow-hidden">
       <head>
+        <title>{`${configServer?.APP_NAME || configClient?.APP_NAME} | ${
+          configServer?.APP_DESCRIPTION || configClient?.APP_DESCRIPTION
+        }`}</title>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="theme-color" content="#fafbfe" />
+        <meta
+          name="description"
+          content={`${configServer?.APP_NAME || configClient?.APP_NAME} | ${
+            configServer?.APP_DESCRIPTION || configClient?.APP_DESCRIPTION
+          }`}
+        />
+        <meta property="og:title" content={`${configServer?.APP_NAME || configClient?.APP_NAME}`} />
+        <meta property="og:description" content={configServer?.APP_DESCRIPTION || configClient?.APP_DESCRIPTION} />
+        <meta property="twitter:title" content={`${configServer?.APP_NAME || configClient?.APP_NAME}`} />
+        <meta property="twitter:description" content={configServer?.APP_DESCRIPTION || configClient?.APP_DESCRIPTION} />
+        {/*
+
+            // { property: "og:url", content: { APP_URL } },
+    // { property: "canonical", content: { APP_URL } },
+    // { property: "og:image", content: "/assets/icons/og-image-1200-630.png" },
+    // { property: "og:image:secure_url", content: `${APP_URL}/assets/icons/og-image-1200-630.png` },
+    // { property: "twitter:image", content: "/assets/icons/og-image-1200-630.png" },
+    // { property: "og:image:type", content: "image/png" },
+    // { property: "og:image:width", content: "1200" },
+    // { property: "og:image:height", content: "630" },
+    // { property: "og:image:alt", content: "My og image" },
+    // { property: "twitter:image:alt", content: "My og image" },
+    // { property: "og:type", content: "website" },
+    // { property: "msapplication-square70x70logo", content: "/assets/icons/mstile-icon-128.png" },
+    // { property: "msapplication-square150x150logo", content: "/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-square310x310logo", content: "/assets/icons/mstile-icon-558.png" },
+    // { property: "msapplication-wide310x150logo", content: "/assets/icons/mstile-icon-558-270.png" },
+    // { property: "apple-mobile-web-app-capable", content: "yes" },
+    // { property: "mobile-web-app-capable", content: "yes" },
+    // { property: "apple-mobile-web-app-status-bar-style", content: fullConfig.theme.colors.app },
+    // { property: "apple-mobile-web-app-title", content: config.APP_NAME },
+    // { property: "application-name", content: config.APP_NAME },
+    // { property: "msapplication-TileColor", content: fullConfig.theme.colors.app },
+    // { property: "msapplication-TileImage", content: "/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-config", content: "/browserconfig.xml" },
+    // { property: "msapplication-tooltip", content: config.APP_DESCRIPTION },
+    // { property: "msapplication-starturl", content: "/" },
+    // { property: "msapplication-navbutton-color", content: fullConfig.theme.colors.app },
+    // { property: "msapplication-task", content: "name=Home;action-uri=/;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=About;action-uri=/about;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Contact;action-uri=/contact;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Blog;action-uri=/blog;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Projects;action-uri=/projects;icon-uri=/assets/icons/mstile-icon-270.png" },
+    // { property: "msapplication-task", content: "name=Services;action-uri=/services;icon-uri=/assets/icons/mstile-icon-270.png" },
+  ];
+        */}
         <Meta />
         <Links />
       </head>
