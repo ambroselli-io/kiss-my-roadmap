@@ -6,15 +6,16 @@ export const StatusesFilter = ({ className = "" }) => {
   const { project } = useLoaderData();
   const statusFilterFetcher = useFetcher();
   const filteredStatuses = useMemo(() => {
-    if (!["loading", "submitting"].includes(statusFilterFetcher.state)) return project.filteredStatuses;
-    if (statusFilterFetcher.submission.formData?.get("action") !== "filter") return project.filteredStatuses;
+    const projectFilteredStatuses = project?.filteredStatuses || [];
+    if (!["loading", "submitting"].includes(statusFilterFetcher.state)) return projectFilteredStatuses;
+    if (statusFilterFetcher.submission.formData?.get("action") !== "filter") return projectFilteredStatuses;
     const newValue = statusFilterFetcher.submission.formData?.get("status");
     if (newValue) {
-      if (project.filteredStatuses.includes(newValue)) return project.filteredStatuses.filter((s) => s !== newValue);
-      return [...project.filteredStatuses, newValue];
+      if (projectFilteredStatuses.includes(newValue)) return projectFilteredStatuses.filter((s) => s !== newValue);
+      return [...projectFilteredStatuses, newValue];
     }
-    return project.filteredStatuses;
-  }, [project.filteredStatuses, statusFilterFetcher.state, statusFilterFetcher.submission?.formData]);
+    return projectFilteredStatuses;
+  }, [project?.filteredStatuses, statusFilterFetcher.state, statusFilterFetcher.submission?.formData]);
 
   return (
     <DropdownMenu

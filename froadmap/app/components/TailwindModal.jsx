@@ -50,7 +50,7 @@ const ModalContainer = ({
             <div
               className={[
                 "fixed inset-0 bg-black/70 transition-opacity ",
-                blurryBackground ? "backdrop-blur-xl" : "",
+                blurryBackground ? "backdrop-blur-sm" : "",
               ].join(" ")}
             />
           </Transition.Child>

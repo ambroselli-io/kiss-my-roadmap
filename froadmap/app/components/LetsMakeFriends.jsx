@@ -1,14 +1,16 @@
-import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "~/components/TailwindModal";
 
-const NewFeature = () => {
-  const navigate = useNavigate();
+const LetsMakeFriends = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const onClose = () => {
-    navigate(-1);
+    searchParams.delete("lets-make-friends");
+    setSearchParams(searchParams);
   };
 
   return (
-    <ModalContainer open onClose={onClose}>
+    <ModalContainer open={searchParams.get("lets-make-friends") === "true"} onClose={onClose} blurryBackground>
       <ModalHeader title="New feature" />
       <ModalBody>Put your form here</ModalBody>
       <ModalFooter>
@@ -20,4 +22,4 @@ const NewFeature = () => {
   );
 };
 
-export default NewFeature;
+export default LetsMakeFriends;

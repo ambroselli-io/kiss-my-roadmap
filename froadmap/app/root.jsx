@@ -10,6 +10,7 @@ import smoothscroll from "smoothscroll-polyfill";
 import dialogPolyfillCSS from "dialog-polyfill/dist/dialog-polyfill.css";
 import * as configClient from "./config.client";
 import * as configServer from "./config.server";
+import LetsMakeFriends from "./components/LetsMakeFriends";
 // import resolveConfig from "tailwindcss/resolveConfig";
 // import tailwindConfig from "../tailwind.config.js";
 // const fullConfig = resolveConfig(tailwindConfig);
@@ -149,6 +150,7 @@ const App = () => {
       </head>
       <body className="flex min-h-screen w-screen flex-col scroll-smooth bg-white antialiased outline-app">
         <Outlet />
+        <LetsMakeFriends />
         <ScrollRestoration />
         <Scripts />
         <script

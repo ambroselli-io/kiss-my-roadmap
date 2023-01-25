@@ -18,6 +18,7 @@ export const loader = async ({ request }) => {
 
   //   userProjects.push(...organisationProjects);
   // }
+  console.log("LASLSLSLS");
   const projects = await ProjectModel.find();
   return {
     projects: projects,
@@ -36,6 +37,8 @@ export const meta = () => {
 export default function Index() {
   const { projects, user } = useLoaderData();
   const newProjectFetcher = useFetcher();
+
+  console.log("BIM");
 
   return (
     <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-hidden">
