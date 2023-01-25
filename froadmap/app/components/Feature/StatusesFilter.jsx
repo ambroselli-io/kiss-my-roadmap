@@ -2,7 +2,7 @@ import { useFetcher, useLoaderData } from "@remix-run/react";
 import { useMemo } from "react";
 import { DropdownMenu } from "../DropdownMenu";
 
-export const StatusesFilter = () => {
+export const StatusesFilter = ({ className = "" }) => {
   const { project } = useLoaderData();
   const statusFilterFetcher = useFetcher();
   const filteredStatuses = useMemo(() => {
@@ -18,7 +18,8 @@ export const StatusesFilter = () => {
 
   return (
     <DropdownMenu
-      className="-my-2 hidden md:block [&_.menu-container]:right-0 [&_.menu-container]:left-[unset] [&_.menu-container]:w-[unset] [&_.menu-button.hide-menu]:italic [&_.menu-button.hide-menu]:opacity-50 [&_button]:-mr-2"
+      id="statuses-filter"
+      className={["[&_.menu-button.hide-menu]:italic [&_.menu-button.hide-menu]:opacity-50", className].join(" ")}
       title={`Filter${filteredStatuses.length ? ` (${filteredStatuses.length})` : ""}...`}
     >
       <statusFilterFetcher.Form method="post" id="status-filter" className="status-filter flex flex-col items-start">

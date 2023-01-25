@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 
-export const DropdownMenu = ({ children, title, className }) => {
+export const DropdownMenu = ({ children, title, className, closeOnItemClick, id }) => {
   const [showMenu, setOpenMenu] = useState(false);
 
   useEffect(() => {
     const listener = (e) => {
+      if (closeOnItemClick && e.target.closest(".menu-container")) {
+        setOpenMenu(false);
+        return;
+      }
       if (e.target.closest(".menu-container")) return;
+
       setOpenMenu(false);
     };
     document.addEventListener("click", listener);
     return () => document.removeEventListener("click", listener);
-  });
+  }, [showMenu, closeOnItemClick]);
 
   return (
     <div className={["relative z-50", className].join(" ")}>
@@ -26,6 +31,7 @@ export const DropdownMenu = ({ children, title, className }) => {
       </button>
       {showMenu && (
         <div
+          id={id}
           className={[
             "menu-container absolute top-8 left-0 w-64 overflow-hidden border border-gray-300 bg-white",
             "[&_button]:w-full [&_button]:p-2 [&_button]:text-left [&_button:hover]:bg-gray-300",

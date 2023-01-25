@@ -8,7 +8,8 @@ import { sortFeatures } from "~/utils/sort";
 import { HelpBlock, MainHelpButton, helpAction } from "~/components/HelpBlock";
 import { getUserFromCookie } from "~/services/auth.server";
 import { StatusesFilter } from "~/components/Feature/StatusesFilter";
-import { SortButton } from "~/components/Feature/SortButton";
+import { SortArrowButton } from "~/components/Feature/SortArrowButton";
+import { SortDropDown } from "~/components/Feature/SortDropDown";
 import { FeatureRow } from "~/components/Feature/FeatureRow";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import OpenTrash from "~/components/OpenTrash";
@@ -67,7 +68,6 @@ export const action = async ({ request, params }) => {
     return json({ ok: true });
   }
 
-  console.log("formData", formData.getAll("action"));
   if (formData.get("action") === "helpSettings") {
     await helpAction({ user, formData });
     return json({ ok: true });
@@ -195,7 +195,7 @@ export default function Index() {
   const { sortBy, sortOrder } = project;
 
   const submit = useSubmit();
-  const onNameClick = useCallback(
+  const onColumnClick = useCallback(
     (e) => {
       const sortkey = e.currentTarget.getAttribute("data-sortkey");
       const formData = new FormData();
@@ -224,7 +224,12 @@ export default function Index() {
       <Outlet />
       <header className="flex justify-between border-b border-gray-200 px-4 text-xs">
         <div className="flex gap-2">
-          <DropdownMenu title="Project" className="[&_.menu-container]:min-w-max">
+          <DropdownMenu
+            id="header-menu-project"
+            closeOnItemClick
+            title="Project"
+            className="[&_.menu-container]:min-w-max"
+          >
             <Form method="post" className="flex flex-col items-start">
               <Link to="/" className="inline-flex items-center gap-1">
                 <div className="h-6 w-6" /> My projects
@@ -250,19 +255,19 @@ export default function Index() {
         </div>
         <MainHelpButton className="py-2 px-4" />
       </header>
-      <main className="flex flex-1 basis-full flex-col justify-start pb-8 text-xs">
-        <Form className="flex shrink-0 flex-col pb-10" onBlur={submitMetadata}>
+      <main className="flex flex-1 basis-full flex-col justify-start pb-4 text-xs md:pb-8">
+        <Form className="flex shrink-0 flex-col md:pb-10" onBlur={submitMetadata}>
           {editTitle ? (
             <input
               type="text"
               name="title"
               defaultValue={project.title}
-              className="p-8 text-4xl font-bold"
+              className="p-4 text-4xl font-bold md:p-8"
               placeholder="Write here the title of your project. 🐉"
             />
           ) : (
             <h1
-              className="cursor-pointer p-8 text-4xl font-bold"
+              className="cursor-pointer p-4 text-4xl font-bold md:p-8"
               onClick={() => {
                 setEditTitle(true);
               }}
@@ -273,8 +278,8 @@ export default function Index() {
           <div className="flex">
             <div className="relative h-min grow">
               <div
-                aria-hidden={true}
-                className="pointer-events-none invisible min-h-[5rem] py-4 px-12"
+                aria-hidden
+                className="pointer-events-none invisible min-h-[5rem] py-4 px-4 md:px-12"
                 placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
               >
                 {project.description?.split("\n").map((item, key) => (
@@ -292,7 +297,7 @@ export default function Index() {
                     submitMetadata(e);
                   }
                 }}
-                className="absolute inset-0 h-full min-h-[5rem] w-full py-4 px-12"
+                className="absolute inset-0 h-full min-h-[5rem] w-full py-4 px-4 md:px-12"
                 placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
               />
             </div>
@@ -320,6 +325,16 @@ export default function Index() {
             </HelpBlock>
           </div>
         </Form>
+        <div className="px-4 md:hidden">
+          <div className="my-1 flex items-center">
+            <p className="m-0 italic">Sort by:</p>
+            <SortDropDown field={sortBy} onClick={onColumnClick} sortOrder={sortOrder} sortBy={sortBy} />
+          </div>
+          <div className="my-1 flex items-center">
+            <p className="m-0 italic">Filter by status:</p>
+            <StatusesFilter />
+          </div>
+        </div>
         <div className="relative w-full max-w-full">
           <div
             aria-roledescription="Header of the list of features - Clicking on a column header can sort the feature by the column, ascending or descending"
@@ -328,40 +343,40 @@ export default function Index() {
             <div className="flex items-start justify-center border-r border-l-0 border-b-2 border-gray-900 bg-white py-4"></div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
-                <SortButton field="feature" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-                <HeaderButton title={`Features`} field="feature" onClick={onNameClick} />
+                <SortArrowButton field="content" onClick={onColumnClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`Features`} field="content" onClick={onColumnClick} />
               </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
-                <SortButton field="businessValue" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-                <HeaderButton title={`🤑\u00A0Added\u00A0value`} field="businessValue" onClick={onNameClick} />
+                <SortArrowButton field="businessValue" onClick={onColumnClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`🤑\u00A0Added\u00A0value`} field="businessValue" onClick={onColumnClick} />
               </div>
             </div>
             <div className="cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900 md:flex">
               <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
-                <SortButton field="devCost" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-                <HeaderButton title={`💸\u00A0Production\u00A0cost`} field="devCost" onClick={onNameClick} />
+                <SortArrowButton field="devCost" onClick={onColumnClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`💸\u00A0Production\u00A0cost`} field="devCost" onClick={onColumnClick} />
               </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
-                <SortButton field="priority" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-                <HeaderButton title={`❗️\u00A0Priority`} field="priority" onClick={onNameClick} />
+                <SortArrowButton field="priority" onClick={onColumnClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`❗️\u00A0Priority`} field="priority" onClick={onColumnClick} />
               </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-x border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
-                <SortButton field="score" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
-                <HeaderButton title={`💯\u00A0Score`} field="score" onClick={onNameClick} />
+                <SortArrowButton field="score" onClick={onColumnClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <HeaderButton title={`💯\u00A0Score`} field="score" onClick={onColumnClick} />
               </div>
             </div>
             <div className="flex cursor-pointer border-y-2 border-l border-r-2 border-gray-900 bg-white p-2 text-left font-medium text-gray-900">
               <div className="relative flex w-full -translate-y-1/2 rotate-90 md:translate-y-0 md:rotate-0">
-                <SortButton field="status" onClick={onNameClick} sortOrder={sortOrder} sortBy={sortBy} />
+                <SortArrowButton field="status" onClick={onColumnClick} sortOrder={sortOrder} sortBy={sortBy} />
                 <div className="flex basis-full justify-between">
-                  <HeaderButton title="Status" field="status" onClick={onNameClick} />
-                  <StatusesFilter />
+                  <HeaderButton title="Status" field="status" onClick={onColumnClick} />
+                  <StatusesFilter className="-my-2 hidden md:block [&_.menu-container]:right-0 [&_.menu-container]:left-[unset] [&_.menu-container]:w-[unset]" />
                 </div>
               </div>
             </div>

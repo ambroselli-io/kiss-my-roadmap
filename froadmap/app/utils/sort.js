@@ -56,7 +56,7 @@ export const sortFeatures =
         ? statusSort[a.status] - statusSort[b.status]
         : statusSort[b.status] - statusSort[a.status];
     }
-    if (sortBy === "feature") {
+    if (sortBy === "content") {
       return sortOrder === "ASC" ? a.content.localeCompare(b.content) : b.content.localeCompare(a.content);
     }
     // DEFAULT SORTING
