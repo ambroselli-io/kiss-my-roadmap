@@ -21,7 +21,7 @@ const ProjectMetadata = () => {
 
   const [editTitle, setEditTitle] = useState(!project.title);
   const submitMetadata = (e) => {
-    if (String(e.target.value) === String(project[e.target.name])) return;
+    if (String(e.target.value || "") === String(project[e.target.name] || "")) return;
     const formData = new FormData();
     formData.append("action", "updateProject");
     formData.append(e.target.name, e.target.value);
@@ -39,7 +39,7 @@ const ProjectMetadata = () => {
   }, [project, transition.state, transition.submission?.formData]);
 
   return (
-    <Form className="flex shrink-0 flex-col md:pb-10" onBlur={submitMetadata} id="project-metadata">
+    <Form className="mt-0.5 flex shrink-0 flex-col md:pb-10" onBlur={submitMetadata} id="project-metadata">
       {editTitle || !project.title ? (
         <input
           type="text"
@@ -59,7 +59,7 @@ const ProjectMetadata = () => {
           {title}
         </h1>
       )}
-      <div className="flex">
+      <div className="mt-0.5 flex flex-col md:flex-row">
         <div className="relative h-min grow">
           <div
             aria-hidden
@@ -85,9 +85,13 @@ const ProjectMetadata = () => {
             placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
           />
         </div>
-        <HelpBlock helpSetting="showRoadmapHelp" className="basis-1/2 !text-left !text-base">
+        <HelpBlock helpSetting="showRoadmapHelp" className="!block basis-1/2 !text-left !text-base">
+          <p className="mb-2 text-xs italic md:hidden">
+            Note: the UX should be much better on desktop screens - table-based compared to card-based
+          </p>
+          <h6 className="font-bold text-gray-600 !opacity-100">Welcome to Froadmap! What are you dealing with here?</h6>
           <p>
-            Froadmap helps you optimize your product roadmap.
+            Froadmap helps you optimize your product's features roadmap.
             <br />
             I know, there are plenty of tools out there, but this one is different.
             <br />

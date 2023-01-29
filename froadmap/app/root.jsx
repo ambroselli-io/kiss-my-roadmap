@@ -178,6 +178,7 @@ const App = () => {
 
         {data.NODE_ENV === "production" && (
           <>
+            <script defer data-domain="froadmap.com" src="https://plausible.io/js/script.js"></script>
             <script
               suppressHydrationWarning
               type="text/javascript"

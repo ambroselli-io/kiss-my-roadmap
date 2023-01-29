@@ -10,7 +10,7 @@ export const FeatureCard = ({ feature, index, className }) => {
   const [showTrash, setShowTrash] = useState(false);
 
   const featureCardFetcher = useFetcher();
-  const formId = `feature-card-${feature._id}`;
+  const formId = `feature-card-${feature._id || index}`;
 
   if (
     featureCardFetcher?.submission?.formData?.get("featureId") === feature._id &&

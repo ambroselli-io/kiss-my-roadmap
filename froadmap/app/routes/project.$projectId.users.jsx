@@ -1,14 +1,15 @@
 import { useLocation, useNavigate, useOutletContext } from "react-router";
-import { Form, useActionData, useTransition } from "@remix-run/react";
+import { Form, useTransition } from "@remix-run/react";
 import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "~/components/TailwindModal";
 import { json } from "@remix-run/node";
 import UserModel from "~/db/models/user.server";
 import ProjectModel from "~/db/models/project.server";
 import { useMemo, useState } from "react";
+import EventModel from "~/db/models/event.server";
+import { getUserFromCookie } from "~/services/auth.server";
 
 export const action = async ({ request, params }) => {
-  // wait for 4 seconds
-
+  const user = await getUserFromCookie(request);
   const formData = await request.formData();
   let projectId = params.projectId;
   const project = await ProjectModel.findById(projectId);
@@ -16,16 +17,27 @@ export const action = async ({ request, params }) => {
   if (deleteUserId) {
     project.users = project.users.filter((u) => u.user.toString() !== deleteUserId);
     await project.save();
+    EventModel.create({
+      project: projectId,
+      user: user._id,
+      event: "USER REMOVED FROM PROJECT",
+      value: JSON.stringify({ user: deleteUserId }),
+    });
     return json({ ok: true });
   }
-  await new Promise((resolve) => setTimeout(resolve, 4000));
   const userEmail = formData.get("newUserEmail");
   if (!userEmail?.length) return json({ ok: true });
-  let user = await UserModel.findOne({ email: userEmail });
-  if (!user) user = await UserModel.create({ email: userEmail });
-  if (project.users.find((u) => u.user.toString() === user._id.toString())) return json({ ok: true });
-  project.users.push({ user: user._id, role: "admin", email: userEmail });
+  let userFromEmail = await UserModel.findOne({ email: userEmail });
+  if (!userFromEmail) userFromEmail = await UserModel.create({ email: userEmail });
+  if (project.users.find((u) => u.user.toString() === userFromEmail._id.toString())) return json({ ok: true });
+  project.users.push({ user: userFromEmail._id, role: "admin", email: userEmail });
   await project.save();
+  EventModel.create({
+    project: projectId,
+    user: user._id,
+    event: "USER ADDED TO PROJECT",
+    value: JSON.stringify({ user: userFromEmail._id, role: "admin", email: userEmail }),
+  });
   return json({ ok: true });
 };
 

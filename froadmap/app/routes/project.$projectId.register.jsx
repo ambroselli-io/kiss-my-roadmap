@@ -1,7 +1,7 @@
 import UserModel from "~/db/models/user.server";
 import bcrypt from "bcryptjs";
-import { json, useLocation, useNavigate, useOutletContext } from "react-router";
-import { Form, Link, useActionData } from "@remix-run/react";
+import { json, useLocation, useNavigate } from "react-router";
+import { Form, useActionData } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { createUserSession } from "~/services/auth.server";
@@ -9,22 +9,33 @@ import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "~/component
 import PasswordInput from "~/components/PasswordInput";
 import OpenInNewWindowIcon from "~/components/icons/OpenInNewWindowIcon";
 import { getPasswordStrengthInTime } from "~/utils/passwordStrength.client";
+import EventModel from "~/db/models/event.server";
 
 export const action = async ({ request }) => {
   const formData = await request.formData();
   const page = formData.get("page");
   const email = formData.get("email");
   if (!email?.length) {
+    EventModel.create({
+      event: "REGISTER NO EMAIL PROVIDED",
+    });
     return json({ ok: false, errorField: "email", error: "No email, no chocolate." }, { status: 400 });
   }
   const password = formData.get("password");
   if (!password) {
+    EventModel.create({
+      event: "REGISTER NO PASSWORD PROVIDED",
+    });
     return json({ ok: false, errorField: "password", error: "Plase provide a password." }, { status: 400 });
   }
 
   if (page === "signup") {
     const existingUser = await UserModel.findOne({ email });
     if (existingUser?.password?.length > 0) {
+      EventModel.create({
+        event: "REGISTER SIGNUP EMAIL ALREADY REGISTERED",
+        user: existingUser._id,
+      });
       return json(
         {
           ok: false,
@@ -36,6 +47,10 @@ export const action = async ({ request }) => {
     }
     const confirmPassword = formData.get("confirm-password");
     if (password !== confirmPassword) {
+      EventModel.create({
+        event: "REGISTER SIGNUP PASSWORDS DON'T MATCH",
+        user: existingUser._id,
+      });
       return json({ ok: false, errorField: "confirm-password", error: "Passwords don't match!" }, { status: 400 });
     }
 
@@ -46,11 +61,19 @@ export const action = async ({ request }) => {
     );
 
     const cookieToSet = await createUserSession(request, user);
+    EventModel.create({
+      event: "REGISTER SIGNUP SUCCESS",
+      user: existingUser._id,
+    });
     return json({ ok: true, data: user.me() }, { status: 200, headers: { "Set-Cookie": cookieToSet } });
   }
   if (page === "signin") {
     const user = await UserModel.findOne({ email });
     if (!user) {
+      EventModel.create({
+        event: "REGISTER SIGNIN EMAIL NOT FOUND",
+        value: email,
+      });
       return json(
         { ok: false, errorField: "email", error: "This email doesn't exist in our database. Please signup instead!" },
         { status: 400 }
@@ -59,11 +82,26 @@ export const action = async ({ request }) => {
     // test a matching password
     const passwordMatched = await bcrypt.compare(password, user.password);
     if (!passwordMatched) {
+      EventModel.create({
+        event: "REGISTER SIGNIN PASSWORD NOT MATCH",
+        value: email,
+      });
       return json({ ok: false, errorField: "password", error: "This password doesn't match!" }, { status: 400 });
     }
     const cookieToSet = await createUserSession(request, user);
+    EventModel.create({
+      event: "REGISTER SIGNIN SUCCESS",
+      value: email,
+    });
     return json({ ok: true, data: user.me() }, { status: 200, headers: { "Set-Cookie": cookieToSet } });
   }
+};
+
+export const loader = async () => {
+  EventModel.create({
+    event: "REGISTER PAGE LOADED",
+  });
+  return null;
 };
 
 const Register = () => {

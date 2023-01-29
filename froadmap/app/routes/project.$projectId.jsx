@@ -15,16 +15,24 @@ import { FeatureCard } from "~/components/Feature/FeatureCard";
 import ProjectMetadata from "~/components/ProjectMetadata";
 import { action as actionLogout } from "./action.logout";
 import TopMenu from "~/components/TopMenu";
+import { defaultFeatures } from "~/utils/defaultFeatures.server";
+import EventModel from "~/db/models/event.server";
+// import { useUserEvent } from "~/utils/useUserEvent";
 
 export const action = async ({ request, params }) => {
   const formData = await request.formData();
-  if (formData.get("action") === "logout") {
-    return await actionLogout({ request, to: "/project/new-project/register" });
-  }
   const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project/register" });
   const url = new URL(request.url);
   const isRegistering = url.pathname.includes("register");
   let projectId = params.projectId;
+  if (formData.get("action") === "logout") {
+    EventModel.create({
+      event: "PROJECT LOGOUT",
+      user: user._id,
+      project: projectId,
+    });
+    return await actionLogout({ request, to: "/project/new-project/register" });
+  }
   if (!projectId) {
     if (isRegistering) return;
     return redirect("/project/new-project");
@@ -32,6 +40,8 @@ export const action = async ({ request, params }) => {
   if (projectId === "new-project") {
     if (isRegistering) return;
     const newProject = await ProjectModel.create({
+      title: formData.get("title") || "",
+      description: formData.get("description") || "",
       createdBy: user._id,
       users: [
         {
@@ -40,6 +50,18 @@ export const action = async ({ request, params }) => {
           email: user.email,
         },
       ],
+    });
+    for (const feature of defaultFeatures) {
+      await FeatureModel.create({
+        project: newProject._id,
+        createdBy: user._id,
+        ...feature,
+      });
+    }
+    EventModel.create({
+      event: "PROJECT CREATE FROM TEMPLATE",
+      user: user._id,
+      project: newProject._id,
     });
     projectId = newProject._id;
     return redirect(`/project/${projectId}`);
@@ -51,15 +73,12 @@ export const action = async ({ request, params }) => {
     if (formData.get("sortOrder")) project.sortOrder = formData.get("sortOrder");
     if (!project.sortOrder) project.sortOrder = "ASC";
     await project.save();
-    return json({ ok: true });
-  }
-
-  if (formData.get("action") === "sort") {
-    const project = await ProjectModel.findById(projectId);
-    if (formData.get("sortBy")) project.sortBy = formData.get("sortBy");
-    if (formData.get("sortOrder")) project.sortOrder = formData.get("sortOrder");
-    if (!project.sortOrder) project.sortOrder = "ASC";
-    await project.save();
+    EventModel.create({
+      event: "PROJECT SORT",
+      user: user._id,
+      project: projectId,
+      value: JSON.stringify({ sortBy: project.sortBy, sortOrder: project.sortOrder }),
+    });
     return json({ ok: true });
   }
 
@@ -73,16 +92,33 @@ export const action = async ({ request, params }) => {
       project.filteredStatuses = [...(project.filteredStatuses || []), statusToToggle];
     }
     await project.save();
+    EventModel.create({
+      event: "PROJECT FILTER",
+      user: user._id,
+      project: projectId,
+      value: JSON.stringify(project.filteredStatuses),
+    });
     return json({ ok: true });
   }
 
   if (formData.get("action") === "deleteFeature") {
     await FeatureModel.findByIdAndUpdate(formData.get("featureId"), { deletedAt: new Date(), deletedBy: user._id });
+    EventModel.create({
+      event: "PROJECT DELETE FEATURE",
+      user: user._id,
+      project: projectId,
+      feature: formData.get("featureId"),
+    });
     return json({ ok: true });
   }
 
   if (formData.get("action") === "deleteProject") {
     await ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date(), deletedBy: user._id });
+    EventModel.create({
+      event: "PROJECT DELETE PROJECT",
+      user: user._id,
+      project: projectId,
+    });
     return redirect("../");
   }
 
@@ -97,6 +133,18 @@ export const action = async ({ request, params }) => {
         },
       ],
     });
+    for (const feature of defaultFeatures) {
+      await FeatureModel.create({
+        project: newProject._id,
+        createdBy: user._id,
+        ...feature,
+      });
+    }
+    EventModel.create({
+      event: "PROJECT CREATE FROM BUTTON NEW PROJECT",
+      user: user._id,
+      project: newProject._id,
+    });
     return redirect(`/project/${newProject._id}`);
   }
 
@@ -105,6 +153,12 @@ export const action = async ({ request, params }) => {
     if (formData.get("title")) project.title = formData.get("title");
     if (formData.get("description")) project.description = formData.get("description");
     await project.save();
+    EventModel.create({
+      event: "PROJECT UPDATE METADATA",
+      user: user._id,
+      project: projectId,
+      value: JSON.stringify({ title: project.title, description: project.description }),
+    });
     return json({ ok: true });
   }
 
@@ -117,16 +171,30 @@ export const action = async ({ request, params }) => {
     const feature = await FeatureModel.findById(formData.get("featureId"));
     const project = await ProjectModel.findById(projectId);
     if (!feature) return json({ ok: false });
-    if (formData.get("content")) {
+    if (formData.get("content") && formData.get("content") !== feature.content) {
       feature.content = formData.get("content");
       if (feature.content?.length > 0 && feature.status === "__new") feature.status = "";
       if (["content"].includes(project.sortBy)) project.sortBy = null;
+      EventModel.create({
+        event: "PROJECT UPDATE FEATURE CONTENT",
+        user: user._id,
+        project: projectId,
+        feature: feature._id,
+        value: JSON.stringify(feature),
+      });
     }
     if (formData.get("devCost")) {
       feature.devCost = formData.get("devCost") === feature.devCost ? "" : formData.get("devCost");
       if (["devCost", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
+      EventModel.create({
+        event: `PROJECT UPDATE FEATURE DEV COST ${feature.devCost}`,
+        user: user._id,
+        project: projectId,
+        feature: feature._id,
+        value: JSON.stringify(feature),
+      });
     }
     if (formData.get("businessValue")) {
       feature.businessValue =
@@ -134,18 +202,39 @@ export const action = async ({ request, params }) => {
       if (["businessValue", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
+      EventModel.create({
+        event: `PROJECT UPDATE FEATURE BUSINESS VALUE ${feature.businessValue}`,
+        user: user._id,
+        project: projectId,
+        feature: feature._id,
+        value: JSON.stringify(feature),
+      });
     }
     if (formData.get("priority")) {
       feature.priority = formData.get("priority") === feature.priority ? "" : formData.get("priority");
       if (["priority", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
+      EventModel.create({
+        event: `PROJECT UPDATE FEATURE PRIORITY ${feature.priority}`,
+        user: user._id,
+        project: projectId,
+        feature: feature._id,
+        value: JSON.stringify(feature),
+      });
     }
     if (formData.get("status")) {
       feature.status = formData.get("status") === feature.status ? "" : formData.get("status");
       if (["status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
+      EventModel.create({
+        event: `PROJECT UPDATE FEATURE STATUS ${feature.status}`,
+        user: user._id,
+        project: projectId,
+        feature: feature._id,
+        value: JSON.stringify(feature),
+      });
     }
     await project.save();
     await feature.save();
@@ -160,14 +249,29 @@ export const loader = async ({ request, params }) => {
   const projectId = params.projectId;
   if (!projectId) return redirect("/project/new-project");
   if (projectId === "new-project") {
+    EventModel.create({
+      event: "PROJECT LOAD FROM NEW-PROJECT ID",
+      user: user?._id,
+    });
     return {
       project: {},
-      features: [{ status: "__new" }],
+      features: [...defaultFeatures.map(appendScore), { status: "__new" }],
       user: user?.me?.(),
     };
   }
   const project = await ProjectModel.findById(projectId);
+  if (!project) {
+    EventModel.create({
+      event: "PROJECT NOT FOUND",
+      user: user?._id,
+    });
+    return redirect("/project/new-project");
+  }
   if (!user) {
+    EventModel.create({
+      event: "PROJECT LOAD WITH NO USER",
+      user: user?._id,
+    });
     return {
       project: {
         ...project?.toObject(),
@@ -201,6 +305,10 @@ export const loader = async ({ request, params }) => {
 
   let newFeature = await FeatureModel.findOne({ project: projectId, status: "__new" }).lean();
   if (!newFeature) {
+    EventModel.create({
+      event: "PROJECT NEW FEATURE CREATED",
+      user: user?._id,
+    });
     newFeature = new FeatureModel({ project: projectId, status: "__new" });
     await newFeature.save();
   }
@@ -280,6 +388,17 @@ export default function Index() {
     }
   }, [project, user, navigate, location.pathname]);
 
+  // const sendUserEvent = useUserEvent();
+  // useEffect(() => {
+  //   console.log("inside");
+  //   sendUserEvent({
+  //     event: "PROJECT OPENED",
+  //     projectId: project._id,
+  //   });
+
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [project?._id]);
+
   return (
     <>
       <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto" key={project._id}>
@@ -349,7 +468,7 @@ export default function Index() {
             </div>
             {features.map((feature, index) => {
               return (
-                <React.Fragment key={feature._id || "__new-feature"}>
+                <React.Fragment key={feature._id || index}>
                   <FeatureRow feature={feature} index={index} className="hidden md:grid" />
                   <FeatureCard feature={feature} index={index} className="md:hidden" />
                 </React.Fragment>

@@ -1,5 +1,6 @@
 import { useLoaderData, useSubmit, useTransition } from "@remix-run/react";
 import { useMemo } from "react";
+import EventModel from "~/db/models/event.server";
 import { availableHelp } from "~/utils/help.server";
 
 export const helpAction = async ({ user, formData }) => {
@@ -7,10 +8,20 @@ export const helpAction = async ({ user, formData }) => {
   if (formData.get("toggleAllHelp")) {
     user.helpSettings = user.helpSettings?.length === 0 ? availableHelp : [];
     await user.save();
+    EventModel.create({
+      event: "HELP TOGGLE ALL",
+      user: user?._id,
+      value: user.helpSettings?.length === 0 ? "on" : "off",
+    });
     return;
   }
   if (!formData.get("helpSetting")) return;
   user.helpSettings = user.helpSettings.filter((_helpSetting) => _helpSetting !== formData.get("helpSetting"));
+  EventModel.create({
+    event: "HELP TOGGLE",
+    user: user?._id,
+    value: formData.get("helpSetting"),
+  });
   await user.save();
 };
 

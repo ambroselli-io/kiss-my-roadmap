@@ -1,22 +1,25 @@
 import React from "react";
-import {
-  redirect,
-  // defer
-} from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import ProjectModel from "~/db/models/project.server";
 import { getUserFromCookie } from "~/services/auth.server";
 import TopMenu from "~/components/TopMenu";
 import { action as actionLogout } from "./action.logout";
 import FeatureModel from "~/db/models/feature.server";
-// import FeatureModel from "~/db/models/feature.server";
+import { defaultFeatures } from "~/utils/defaultFeatures.server";
+import EventModel from "~/db/models/event.server";
+// import { useUserEvent } from "~/utils/useUserEvent";
 
 export const action = async ({ request }) => {
+  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
   const formData = await request.formData();
   if (formData.get("action") === "logout") {
+    EventModel.create({
+      event: "PROJECTS LOGOUT",
+      user: user?._id,
+    });
     return await actionLogout({ request, to: "/project/new-project/register" });
   }
-  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
   const newProject = await ProjectModel.create({
     createdBy: user._id,
     users: [
@@ -27,69 +30,26 @@ export const action = async ({ request }) => {
       },
     ],
   });
-  await FeatureModel.create({
+  EventModel.create({
+    event: "PROJECTS NEW PROJECT",
+    user: user?._id,
     project: newProject._id,
-    content: "LAUNCH PROJECT",
-    businessValue: "XL",
-    priority: "YES",
-    devCost: "S",
-    status: "NOTREADYYET",
-    createdBy: user._id,
   });
-  await FeatureModel.create({
-    project: newProject._id,
-    content: "Market my project",
-    businessValue: "XL",
-    priority: "YES",
-    devCost: "M",
-    status: "TODO",
-    createdBy: user._id,
-  });
-  await FeatureModel.create({
-    project: newProject._id,
-    content: "Enable the Dark Mode",
-    businessValue: "XS",
-    priority: "NO",
-    devCost: "M",
-    status: "KO",
-    createdBy: user._id,
-  });
+  for (const feature of defaultFeatures) {
+    await FeatureModel.create({
+      project: newProject._id,
+      createdBy: user._id,
+      ...feature,
+    });
+  }
   return redirect(`/project/${newProject._id}`);
 };
 
 export const loader = async ({ request }) => {
   const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
 
-  // const userProjects = [];
-  // for (const organisationId of user.organisations) {
-  // const organisationProjects = await ProjectModel.find({ organisation: organisationId });
-
-  //   userProjects.push(...organisationProjects);
-  // }
-
   const projects = await ProjectModel.find({ "users.user": user._id });
 
-  // agreggate features by project then by status
-  // const features = await FeatureModel.aggregate([
-  //   {
-  //     $match: {
-  //       project: { $in: projects.map((project) => project._id) },
-  //       status: { $ne: "__new" },
-  //     },
-  //   },
-  //   {
-  //     $group: {
-  //       _id: { project: "$project", status: "$status" },
-  //       count: { $sum: 1 },
-  //     },
-  //   },
-  // ]);
-
-  // return defer({
-  //   projects,
-  //   features,
-  //   user,
-  // });
   return {
     projects,
     user,
@@ -107,6 +67,8 @@ export const meta = () => {
 export default function Index() {
   const { projects, user, features } = useLoaderData();
   const newProjectFetcher = useFetcher();
+
+  // const sendUserEvent = useUserEvent();
 
   const colors = [
     ["#2A9D8F", "#000"],
