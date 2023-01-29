@@ -36,6 +36,24 @@ export const action = async ({ request }) => {
     status: "NOTREADYYET",
     createdBy: user._id,
   });
+  await FeatureModel.create({
+    project: newProject._id,
+    content: "Market my project",
+    businessValue: "XL",
+    priority: "YES",
+    devCost: "M",
+    status: "TODO",
+    createdBy: user._id,
+  });
+  await FeatureModel.create({
+    project: newProject._id,
+    content: "Enable the Dark Mode",
+    businessValue: "XS",
+    priority: "NO",
+    devCost: "M",
+    status: "KO",
+    createdBy: user._id,
+  });
   return redirect(`/project/${newProject._id}`);
 };
 
