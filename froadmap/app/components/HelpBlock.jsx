@@ -20,11 +20,12 @@ export const HelpBlock = ({ children, helpSetting, className = "" }) => {
   const transition = useTransition();
 
   const showHelp = useMemo(() => {
+    if (!user) return true;
     const setting = user?.helpSettings.includes(helpSetting);
     if (!["loading", "submitting"].includes(transition.state)) return setting;
     if (transition.submission?.formData?.get("helpSetting") === helpSetting) return false;
     if (transition.submission?.formData?.get("toggleAllHelp")) {
-      if (user.helpSettings?.length === 0) return true;
+      if (user?.helpSettings?.length === 0) return true;
       return false;
     }
     return setting;
@@ -71,15 +72,15 @@ export const MainHelpButton = ({ className }) => {
   const caption = useMemo(() => {
     if (["loading", "submitting"].includes(transition.state)) {
       if (transition.submission?.formData?.get("helpSetting")) {
-        if (user.helpSettings?.length === 1) return "Show help";
+        if (user?.helpSettings?.length === 1) return "Show help";
         return "Hide help";
       }
       if (transition.submission?.formData?.get("toggleAllHelp")) {
-        if (user.helpSettings?.length === 0) return "Hide help";
+        if (user?.helpSettings?.length === 0) return "Hide help";
         return "Show help";
       }
     }
-    return user.helpSettings.length === 0 ? "Show help" : "Hide help";
+    return user?.helpSettings.length === 0 ? "Show help" : "Hide help";
   }, [transition, user]);
 
   return (

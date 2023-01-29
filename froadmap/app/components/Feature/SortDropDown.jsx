@@ -35,7 +35,6 @@ export const SortDropDown = ({ field, onClick, sortOrder, sortBy }) => {
       <SortArrowButton
         field={field}
         onClick={(e) => {
-          console.log("SortArrowButton.onClick", e);
           e.stopPropagation();
           onClick(e);
         }}

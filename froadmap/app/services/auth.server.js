@@ -2,7 +2,7 @@ import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import { APP_NAME, SECRET } from "../config.server";
 import UserModel from "../db/models/user.server";
 
-const sessionExpirationTime = 1000 * 60 * 60 * 24 * 365;
+const sessionExpirationTime = 1000 * 60 * 60 * 24 * 365 * 10; // 10 years
 
 export const { getSession, commitSession, destroySession } = createCookieSessionStorage({
   cookie: {
@@ -16,30 +16,27 @@ export const { getSession, commitSession, destroySession } = createCookieSession
   },
 });
 
-export const getUserFromCookie = async (request, { redirectTo = "/", noRedirect = false } = {}) => {
-  /* TEMP */
-  const user = await UserModel.findOne();
-  // const session = await getSession(request.headers.get("Cookie"));
-  // if (!session) {
-  //   if (!noRedirect) {
-  //     throw redirect(redirectTo);
-  //   }
-  // }
-  // const userId = session.get("userId");
-  // const user = await UserModel.findById(userId);
-  // if (!user && !noRedirect) throw redirect(redirectTo);
-  // if (!noRedirect) return redirect("/profil");
-  return user;
+export const getUserFromCookie = async (request, { failureRedirect = "/", optional = false } = {}) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  if (!session) {
+    throw redirect(failureRedirect);
+  }
+  const userId = session.get("userId");
+  const user = await UserModel.findById(userId);
+  if (user) return user;
+  if (optional) return null;
+  throw redirect(failureRedirect);
 };
 
-export const getUnauthentifiedUserFromCookie = (request) => getUserFromCookie(request, { noRedirect: true });
+export const getUnauthentifiedUserFromCookie = (request) => getUserFromCookie(request, { optional: true });
 
-export const createUserSession = async (request, user, redirectTo = "/") => {
+export const createUserSession = async (request, user, failureRedirect) => {
   const session = await getSession(request.headers.get("Cookie"));
   session.set("userId", user._id);
   user.set({ lastLoginAt: Date.now() });
   await user.save();
-  return redirect(redirectTo, {
+  if (!failureRedirect) return await commitSession(session);
+  return redirect(failureRedirect, {
     headers: {
       "Set-Cookie": await commitSession(session),
     },

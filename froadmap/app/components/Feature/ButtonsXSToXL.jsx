@@ -1,19 +1,7 @@
 import { useMemo } from "react";
 
-export const ButtonsXSToXL = ({ feature, name, featureFetcher, form, className = "", debug }) => {
+export const ButtonsXSToXL = ({ feature, name, featureFetcher, form, className = "" }) => {
   const selected = useMemo(() => {
-    if (debug) {
-      console.log(
-        `["loading", "submitting"].includes(featureFetcher.state)`,
-        ["loading", "submitting"].includes(featureFetcher.state)
-      );
-      console.log(
-        `featureFetcher.submission?.formData?.get("featureId")`,
-        featureFetcher.submission?.formData?.get("featureId")
-      );
-      console.log("feature?._id", feature?._id);
-      console.log(featureFetcher.submission?.formData?.get("featureId") !== feature?._id);
-    }
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
       const newValue = featureFetcher.submission.formData?.get(name);
@@ -23,8 +11,8 @@ export const ButtonsXSToXL = ({ feature, name, featureFetcher, form, className =
       }
     }
     return feature[name];
-  }, [feature, name, featureFetcher, debug]);
-  if (debug) console.log("selected", selected);
+  }, [feature, name, featureFetcher]);
+
   return (
     <div className={["flex flex-row gap-1 px-1 py-2", className].join(" ")}>
       <button

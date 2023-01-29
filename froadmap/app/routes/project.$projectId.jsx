@@ -1,27 +1,58 @@
-import React, { useCallback, useState } from "react";
-import { Form, Link, Outlet, useLoaderData, useSubmit } from "@remix-run/react";
+import React, { useCallback, useEffect } from "react";
+import { Outlet, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
 import { json, redirect } from "@remix-run/node";
 import { appendScore } from "~/utils/score";
 import { sortFeatures } from "~/utils/sort";
-import { HelpBlock, MainHelpButton, helpAction } from "~/components/HelpBlock";
-import { getUserFromCookie } from "~/services/auth.server";
+import { helpAction } from "~/components/HelpBlock";
+import { getUnauthentifiedUserFromCookie, getUserFromCookie } from "~/services/auth.server";
 import { StatusesFilter } from "~/components/Feature/StatusesFilter";
 import { SortArrowButton } from "~/components/Feature/SortArrowButton";
 import { SortDropDown } from "~/components/Feature/SortDropDown";
 import { FeatureRow } from "~/components/Feature/FeatureRow";
-import { DropdownMenu } from "~/components/DropdownMenu";
-import OpenTrash from "~/components/OpenTrash";
 import { FeatureCard } from "~/components/Feature/FeatureCard";
+import ProjectMetadata from "~/components/ProjectMetadata";
+import { action as actionLogout } from "./action.logout";
+import TopMenu from "~/components/TopMenu";
 
 export const action = async ({ request, params }) => {
-  const user = await getUserFromCookie();
-  const projectId = params.projectId;
-  console.log({ projectId, params });
-  if (!projectId) return redirect("/project/new-project");
-  if (projectId === "new-project") return redirect("/project/new-project?lets-make-friends=true");
   const formData = await request.formData();
+  if (formData.get("action") === "logout") {
+    return await actionLogout({ request, to: "/project/new-project/register" });
+  }
+  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project/register" });
+  const url = new URL(request.url);
+  const isRegistering = url.pathname.includes("register");
+  let projectId = params.projectId;
+  if (!projectId) {
+    if (isRegistering) return;
+    return redirect("/project/new-project");
+  }
+  if (projectId === "new-project") {
+    if (isRegistering) return;
+    const newProject = await ProjectModel.create({
+      createdBy: user._id,
+      users: [
+        {
+          user: user._id,
+          permission: "admin",
+          email: user.email,
+        },
+      ],
+    });
+    projectId = newProject._id;
+    return redirect(`/project/${projectId}`);
+  }
+
+  if (formData.get("action") === "sort") {
+    const project = await ProjectModel.findById(projectId);
+    if (formData.get("sortBy")) project.sortBy = formData.get("sortBy");
+    if (formData.get("sortOrder")) project.sortOrder = formData.get("sortOrder");
+    if (!project.sortOrder) project.sortOrder = "ASC";
+    await project.save();
+    return json({ ok: true });
+  }
 
   if (formData.get("action") === "sort") {
     const project = await ProjectModel.findById(projectId);
@@ -51,13 +82,21 @@ export const action = async ({ request, params }) => {
   }
 
   if (formData.get("action") === "deleteProject") {
-    console.log("delete project");
     await ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date(), deletedBy: user._id });
     return redirect("../");
   }
 
   if (formData.get("action") === "newProject") {
-    const newProject = await ProjectModel.create({});
+    const newProject = await ProjectModel.create({
+      createdBy: user._id,
+      users: [
+        {
+          user: user._id,
+          permission: "admin",
+          email: user.email,
+        },
+      ],
+    });
     return redirect(`/project/${newProject._id}`);
   }
 
@@ -116,7 +155,7 @@ export const action = async ({ request, params }) => {
 };
 
 export const loader = async ({ request, params }) => {
-  const user = await getUserFromCookie();
+  const user = await getUnauthentifiedUserFromCookie(request);
 
   const projectId = params.projectId;
   if (!projectId) return redirect("/project/new-project");
@@ -124,13 +163,23 @@ export const loader = async ({ request, params }) => {
     return {
       project: {},
       features: [{ status: "__new" }],
-      user,
+      user: user?.me?.(),
     };
   }
   const project = await ProjectModel.findById(projectId);
+  if (!user) {
+    return {
+      project: {
+        ...project?.toObject(),
+        description: "",
+      },
+      features: [{ status: "__new" }],
+      user: null,
+    };
+  }
   const features = await FeatureModel.find({
     project: projectId,
-    status: { $nin: [...(project.filteredStatuses || []), "__new"] },
+    status: { $nin: [...(project?.filteredStatuses || []), "__new"] },
   }).lean();
 
   if (!project.sortedFeaturesIds || project.sortedFeaturesIds.length === 0) {
@@ -162,7 +211,7 @@ export const loader = async ({ request, params }) => {
     return {
       project,
       features: augmentedFeatures,
-      user,
+      user: user?.me?.(),
     };
   } finally {
     project.sortedFeaturesIds = augmentedFeatures.map((f) => f._id);
@@ -173,33 +222,34 @@ export const loader = async ({ request, params }) => {
 export const meta = ({ data }) => {
   return [
     {
-      title: `${data.project?.title || "New project"} | Froadmap`,
+      title: `${data?.project?.title || "New project"} | Froadmap`,
     },
     {
       name: "description",
-      content: data.project?.description || "No description yet",
+      content: data?.project?.description || "No description yet",
     },
     {
       name: "og:title",
-      content: `${data.project?.title || "New project"} | Froadmap`,
+      content: `${data?.project?.title || "New project"} | Froadmap`,
     },
     {
       name: "og:description",
-      content: data.project?.description || "No description yet",
+      content: data?.project?.description || "No description yet",
     },
     {
       name: "twitter:title",
-      content: `${data.project?.title || "New project"} | Froadmap`,
+      content: `${data?.project?.title || "New project"} | Froadmap`,
     },
     {
       name: "twitter:description",
-      content: data.project?.description || "No description yet",
+      content: data?.project?.description || "No description yet",
     },
   ];
 };
 
 export default function Index() {
-  const { project, features } = useLoaderData();
+  const data = useLoaderData();
+  const { project, features, user } = data;
 
   const { sortBy, sortOrder } = project;
 
@@ -219,121 +269,23 @@ export default function Index() {
     [sortBy, sortOrder, submit]
   );
 
-  const [editTitle, setEditTitle] = useState(!project.title);
-  const submitMetadata = (e) => {
-    const formData = new FormData();
-    formData.append("action", "updateProject");
-    formData.append(e.target.name, e.target.value);
-    submit(formData, { method: "POST", replace: true });
-    setEditTitle(false);
-  };
+  const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(() => {
+    if (!user?._id && !!project?._id && !location.pathname.includes("register")) {
+      navigate("register");
+    }
+    if (!!user?._id && !!project?._id && !project?.users?.find(({ user: userId }) => userId === user._id)) {
+      navigate("/");
+    }
+  }, [project, user, navigate, location.pathname]);
 
   return (
     <>
       <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto" key={project._id}>
-        <header className="flex justify-between border-b border-gray-200 px-4 text-xs">
-          <div className="flex gap-2">
-            <DropdownMenu
-              id="header-menu-project"
-              closeOnItemClick
-              title="Project"
-              className="[&_.menu-container]:min-w-max"
-            >
-              <Form method="post" className="flex flex-col items-start">
-                <Link to="/" className="inline-flex items-center gap-1">
-                  <div className="h-6 w-6" /> My projects
-                </Link>
-                <button type="submit" name="action" value="newProject" className="inline-flex items-center gap-1">
-                  <div className="inline-flex h-6 w-6 items-center justify-center">+</div> New project
-                </button>
-                <button
-                  type="submit"
-                  name="action"
-                  value="deleteProject"
-                  className="inline-flex items-center gap-1 text-red-500 hover:text-red-600"
-                  onClick={(e) => {
-                    if (!confirm("Are you sure you want to delete this project?")) {
-                      e.preventDefault();
-                    }
-                  }}
-                >
-                  <OpenTrash className="h-6 w-6" /> Delete project
-                </button>
-              </Form>
-            </DropdownMenu>
-          </div>
-          <MainHelpButton className="py-2 px-4" />
-        </header>
+        <TopMenu />
         <main className="flex flex-1 basis-full flex-col justify-start pb-4 text-xs md:pb-8">
-          <Form className="flex shrink-0 flex-col md:pb-10" onBlur={submitMetadata}>
-            {editTitle ? (
-              <input
-                type="text"
-                name="title"
-                defaultValue={project.title}
-                className="p-4 text-4xl font-bold md:p-8"
-                placeholder="Write here the title of your project. 🐉"
-              />
-            ) : (
-              <h1
-                className="cursor-pointer p-4 text-4xl font-bold md:p-8"
-                onClick={() => {
-                  setEditTitle(true);
-                }}
-              >
-                {project.title}
-              </h1>
-            )}
-            <div className="flex">
-              <div className="relative h-min grow">
-                <div
-                  aria-hidden
-                  className="pointer-events-none invisible min-h-[5rem] py-4 px-4 md:px-12"
-                  placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
-                >
-                  {project.description?.split("\n").map((item, key) => (
-                    <span key={key}>
-                      {item}
-                      <br />
-                    </span>
-                  ))}
-                </div>
-                <textarea
-                  defaultValue={project.description}
-                  name="description"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      submitMetadata(e);
-                    }
-                  }}
-                  className="absolute inset-0 h-full min-h-[5rem] w-full py-4 px-4 md:px-12"
-                  placeholder="Write here the description of the project. Try to be as concise as possible, with some objectives so that the features are aligned with the project goals."
-                />
-              </div>
-              <HelpBlock helpSetting="showRoadmapHelp" className="basis-1/2 !text-left !text-base">
-                <p>
-                  Froadmap helps you optimize your product roadmap.
-                  <br />
-                  I know, there are plenty of tools out there, but this one is different.
-                  <br />
-                  The secret of this template: KISS 💋. In other words: Keep It Simple, Stupid.
-                </p>
-                <strong>
-                  <ul className="list-inside list-disc">
-                    By keeping things simple, you can go fast on:
-                    <li>listing the features you can build</li>
-                    <li>which one are really worth it</li>
-                    <li>which one you should build first</li>
-                    <li>iterate cleverly on your product.</li>
-                  </ul>
-                </strong>
-                <p>
-                  Last but not least: don't build too much! At least not at the beginning of your journey. Don't forget
-                  to launch your product, make users appreciate your features, and iterate on it.
-                </p>
-              </HelpBlock>
-            </div>
-          </Form>
+          <ProjectMetadata />
           <div className={["px-4 md:hidden", features?.length <= 1 ? "invisible" : ""].join(" ")}>
             <div className="my-1 flex items-center">
               <p className="m-0 italic">Sort by:</p>
@@ -404,9 +356,9 @@ export default function Index() {
               );
             })}
           </div>
-          <Outlet />
         </main>
       </div>
+      <Outlet context={data} />
     </>
   );
 }

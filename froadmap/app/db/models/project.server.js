@@ -19,6 +19,16 @@ const Schema = new mongoose.Schema(
     filteredStatuses: { type: [String], default: [] },
     deletedAt: { type: Date },
     deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    users: [
+      {
+        type: {
+          user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+          permission: { type: String, enum: ["read", "write", "admin"] },
+          email: { type: String },
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

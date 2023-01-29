@@ -1,16 +1,32 @@
 import React from "react";
 import { redirect } from "@remix-run/node";
-import { Form, Link, useFetcher, useLoaderData } from "@remix-run/react";
+import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import ProjectModel from "~/db/models/project.server";
-import UserModel from "~/db/models/user.server";
+import { getUserFromCookie } from "~/services/auth.server";
+import TopMenu from "~/components/TopMenu";
+import { action as actionLogout } from "./action.logout";
 
-export const action = async () => {
-  const newProject = await ProjectModel.create({});
+export const action = async ({ request }) => {
+  const formData = await request.formData();
+  if (formData.get("action") === "logout") {
+    return await actionLogout({ request, to: "/project/new-project/register" });
+  }
+  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
+  const newProject = await ProjectModel.create({
+    createdBy: user._id,
+    users: [
+      {
+        user: user._id,
+        permission: "admin",
+        email: user.email,
+      },
+    ],
+  });
   return redirect(`/project/${newProject._id}`);
 };
 
 export const loader = async ({ request }) => {
-  // const user = await UserModel.findOne();
+  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
 
   // const userProjects = [];
   // for (const organisationId of user.organisations) {
@@ -18,11 +34,11 @@ export const loader = async ({ request }) => {
 
   //   userProjects.push(...organisationProjects);
   // }
-  console.log("LASLSLSLS");
-  const projects = await ProjectModel.find();
+
+  const projects = await ProjectModel.find({ "users.user": user._id });
   return {
     projects: projects,
-    // user,
+    user,
   };
 };
 
@@ -38,10 +54,9 @@ export default function Index() {
   const { projects, user } = useLoaderData();
   const newProjectFetcher = useFetcher();
 
-  console.log("BIM");
-
   return (
     <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-hidden">
+      <TopMenu />
       <h1 className="m-4 text-3xl">Welcome to Roadmap, the table to make your roadmaps ! 🗺️</h1>
       <main className="relative flex flex-wrap justify-center gap-4 overflow-auto p-4 md:justify-start md:gap-16 md:p-16">
         {projects.map((project) => (

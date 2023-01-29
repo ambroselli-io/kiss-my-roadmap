@@ -113,17 +113,17 @@ export const FeatureRow = ({ feature, index, className }) => {
           <ButtonsYesNo form={formId} name="priority" feature={feature} featureFetcher={featureRowFetcher} />
         </>
       </div>
-      <div className="border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
+      <div className="flex flex-col items-stretch justify-center gap-2 border-x border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">
         <>
           {index === 0 && (
-            <HelpBlock helpSetting="showScoreHelp" className="help-score peer">
+            <HelpBlock helpSetting="showScoreHelp" className="help-score peer mb-auto">
               <p>
                 Simple formula: business value + production cost. The higher the score, the more you should build it. If
                 you toggle the priority, the score will be multiplied by 5.
               </p>
             </HelpBlock>
           )}
-          <Score feature={feature} featureFetcher={featureRowFetcher} className="justify-center" />
+          <Score feature={feature} featureFetcher={featureRowFetcher} className="justify-center py-2" />
         </>
       </div>
       <div className="flex flex-col items-stretch justify-center gap-2 border-l border-r-2 border-b-2 border-gray-900 bg-white text-left font-medium text-gray-900">

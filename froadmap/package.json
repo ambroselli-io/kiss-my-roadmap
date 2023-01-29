@@ -34,11 +34,12 @@
   ],
   "dependencies": {
     "@headlessui/react": "^1.7.7",
-    "@remix-run/node": "^1.10.1",
-    "@remix-run/react": "^1.10.1",
-    "@remix-run/serve": "^1.10.1",
+    "@remix-run/node": "^1.11.1",
+    "@remix-run/react": "^1.11.1",
+    "@remix-run/serve": "^1.11.1",
     "@sentry/remix": "^7.27.0",
     "aws-sdk": "^2.1277.0",
+    "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.7",
     "dialog-polyfill": "^0.5.6",
     "isbot": "^3.6.5",
@@ -51,8 +52,8 @@
     "smoothscroll-polyfill": "^0.4.4"
   },
   "devDependencies": {
-    "@remix-run/dev": "^1.10.1",
-    "@remix-run/eslint-config": "^1.10.1",
+    "@remix-run/dev": "^1.11.1",
+    "@remix-run/eslint-config": "^1.11.1",
     "@sentry/cli": "^2.10.0",
     "@tailwindcss/line-clamp": "^0.4.2",
     "autoprefixer": "^10.4.13",

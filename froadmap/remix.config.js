@@ -2,7 +2,7 @@
  * @type {import('@remix-run/dev').AppConfig}
  */
 module.exports = {
-  ignoredRouteFiles: ["**/.*"],
+  // ignoredRouteFiles: ["**/.*"],
   future: {
     v2_meta: true,
     v2_routeConvention: true,

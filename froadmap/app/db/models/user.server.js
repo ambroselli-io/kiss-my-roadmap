@@ -15,6 +15,7 @@ const Schema = new mongoose.Schema(
       match: [/^.+@(?:[\w-]+\.)+\w+$/, "Please fill a valid email address"],
       sparse: true,
     },
+    password: { type: String },
     name: { type: String },
     job: { type: String },
     urlOrigin: { type: String },

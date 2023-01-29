@@ -1,7 +1,7 @@
 const OpenInNewWindowIcon = ({ className = "h-3 w-3" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className={`h-6 w-6 cursor-pointer ${className}`}
+    className={`cursor-pointer ${className}`}
     fill="#000000"
     viewBox="0 0 490 491"
     stroke="currentColor"

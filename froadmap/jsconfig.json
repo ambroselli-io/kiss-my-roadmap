@@ -1,12 +1,5 @@
 {
-  "include": [
-    "remix.env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx",
-    "app/routes/project.$projectId.index.jsx"
-  ],
+  "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "app/routes/project.$projectId.jsx"],
   "exclude": ["public", "build"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2019"],

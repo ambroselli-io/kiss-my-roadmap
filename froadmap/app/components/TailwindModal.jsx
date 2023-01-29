@@ -50,13 +50,13 @@ const ModalContainer = ({
             <div
               className={[
                 "fixed inset-0 bg-black/70 transition-opacity ",
-                blurryBackground ? "backdrop-blur-sm" : "",
+                // blurryBackground ? "backdrop-blur-sm" : "",
               ].join(" ")}
             />
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto" ref={backgroundRef}>
-            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div className="flex min-h-full items-end justify-center pb-4 text-center sm:items-center">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -74,7 +74,7 @@ const ModalContainer = ({
               >
                 <Dialog.Panel
                   className={[
-                    "relative flex max-h-[90vh] transform flex-col rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full ",
+                    "relative flex w-[97%] transform flex-col rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:max-h-[90vh]",
                     size === "lg" ? "sm:max-w-lg" : "",
                     size === "xl" ? "sm:max-w-xl" : "",
                     size === "3xl" ? "sm:max-w-3xl" : "",
@@ -134,17 +134,22 @@ const ModalHeader = ({ children, title }) => {
 
 const ModalBody = ({ children, className = "" }) => {
   return (
-    <div className="shrink bg-white pb-4">
+    <div className="shrink bg-white">
       <div className="sm:flex sm:items-start">
-        <div className={["w-full text-center sm:mt-0 sm:text-left", className].join(" ")}>{children}</div>
+        <div className={["w-full pb-4 text-left sm:mt-0", className].join(" ")}>{children}</div>
       </div>
     </div>
   );
 };
 
-const ModalFooter = ({ children }) => {
+const ModalFooter = ({ children, className }) => {
   return (
-    <div className="shrink-0 rounded-b-lg border-t border-gray-200 bg-gray-50 px-4 py-3 sm:flex sm:justify-end sm:px-6">
+    <div
+      className={[
+        "shrink-0 rounded-b-lg border-t border-gray-200 bg-gray-50 px-4 py-3 sm:flex sm:justify-end sm:px-6",
+        className,
+      ].join(" ")}
+    >
       {children}
     </div>
   );
