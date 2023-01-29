@@ -31,7 +31,7 @@ const TopMenu = () => {
   );
 
   return (
-    <header className="flex justify-between border-b border-gray-200 px-4 text-xs">
+    <header className="flex justify-between border-b-2 px-4 text-xs">
       {!!user?._id && (
         <>
           <div className="flex gap-2">
@@ -70,11 +70,11 @@ const TopMenu = () => {
           )}
         </>
       )}
-      <MainHelpButton className="ml-auto py-2 px-4 " />
+      {!!project?._id && <MainHelpButton className="ml-auto py-2 px-4 " />}
       <button
         formMethod="post"
         formAction="/action/logout"
-        className="py-2 px-4"
+        className="py-2 px-4 text-right"
         type="button"
         onClick={(e) => {
           const formData = new FormData();
@@ -82,7 +82,7 @@ const TopMenu = () => {
           submit(formData, { method: "POST", replace: true });
         }}
       >
-        {!user?._id ? "Register" : `Logout (${user?.name || user?.email})`}
+        {!user?._id ? "Register" : <>Logout ({user?.name || user?.email})</>}
       </button>
     </header>
   );

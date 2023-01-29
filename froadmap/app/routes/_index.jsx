@@ -1,10 +1,15 @@
 import React from "react";
-import { redirect } from "@remix-run/node";
+import {
+  redirect,
+  // defer
+} from "@remix-run/node";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import ProjectModel from "~/db/models/project.server";
 import { getUserFromCookie } from "~/services/auth.server";
 import TopMenu from "~/components/TopMenu";
 import { action as actionLogout } from "./action.logout";
+import FeatureModel from "~/db/models/feature.server";
+// import FeatureModel from "~/db/models/feature.server";
 
 export const action = async ({ request }) => {
   const formData = await request.formData();
@@ -22,6 +27,15 @@ export const action = async ({ request }) => {
       },
     ],
   });
+  await FeatureModel.create({
+    project: newProject._id,
+    content: "LAUNCH PROJECT",
+    businessValue: "XL",
+    priority: "YES",
+    devCost: "S",
+    status: "NOTREADYYET",
+    createdBy: user._id,
+  });
   return redirect(`/project/${newProject._id}`);
 };
 
@@ -36,8 +50,30 @@ export const loader = async ({ request }) => {
   // }
 
   const projects = await ProjectModel.find({ "users.user": user._id });
+
+  // agreggate features by project then by status
+  // const features = await FeatureModel.aggregate([
+  //   {
+  //     $match: {
+  //       project: { $in: projects.map((project) => project._id) },
+  //       status: { $ne: "__new" },
+  //     },
+  //   },
+  //   {
+  //     $group: {
+  //       _id: { project: "$project", status: "$status" },
+  //       count: { $sum: 1 },
+  //     },
+  //   },
+  // ]);
+
+  // return defer({
+  //   projects,
+  //   features,
+  //   user,
+  // });
   return {
-    projects: projects,
+    projects,
     user,
   };
 };
@@ -51,22 +87,52 @@ export const meta = () => {
 };
 
 export default function Index() {
-  const { projects, user } = useLoaderData();
+  const { projects, user, features } = useLoaderData();
   const newProjectFetcher = useFetcher();
 
+  const colors = [
+    ["#2A9D8F", "#000"],
+    ["#F4A261", "#000"],
+    ["#fb8500", "#000"],
+    ["#219ebc", "#000"],
+    ["#E76F51", "#000"],
+    ["#023047", "#fff"],
+    ["#ffb703", "#000"],
+    ["#8ecae6", "#000"],
+    ["#E9C46A", "#000"],
+    ["#264653", "#fff"],
+  ];
+
   return (
-    <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-hidden">
+    <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-auto">
       <TopMenu />
-      <h1 className="m-4 text-3xl">Welcome to Roadmap, the table to make your roadmaps ! 🗺️</h1>
-      <main className="relative flex flex-wrap justify-center gap-4 overflow-auto p-4 md:justify-start md:gap-16 md:p-16">
-        {projects.map((project) => (
-          <div key={project._id} className="flex shrink-0 basis-full flex-col justify-between md:basis-1/4">
-            <div className="m-auto block w-full max-w-sm rounded-lg bg-white p-6 drop-shadow-lg md:m-0">
-              <h5 className="mb-2 text-xl font-medium leading-tight text-gray-900">
-                {project.title || "Un futur projet de maboule"}
+      <h1 className="m-8 mt-16 text-4xl font-semibold md:mx-16 md:text-6xl">
+        Welcome to Froadmap, the table to make your feature's roadmaps!
+      </h1>
+      {projects.length > 0 && (
+        <p className="m-8 text-xl md:mx-16">
+          You have {projects.length} project{projects.length > 1 ? "s" : ""} in progress.
+        </p>
+      )}
+      <main className="relative flex flex-wrap justify-center gap-8 p-4 md:justify-start md:gap-16 md:p-16">
+        {projects.map((project, index) => (
+          <Link
+            to={`/project/${project._id}`}
+            key={project._id}
+            className="flex shrink-0 basis-full flex-col justify-between md:basis-1/4"
+          >
+            <div className="m-auto block w-full max-w-sm border-2 bg-white md:m-0 md:min-w-xs">
+              <h5
+                className="p-6 text-xl font-medium leading-tight text-gray-900"
+                style={{
+                  backgroundColor: colors[index % colors.length][0],
+                  color: colors[index % colors.length][1],
+                }}
+              >
+                {project.title || "A crazy project... yet to come!"}
               </h5>
-              <p className="mb-4 max-h-24 overflow-y-auto text-base text-gray-700">
-                {(project.description || "Ya pas de description encore, mais ça ne saurait tarder ?")
+              <p className="mx-6 my-2 h-18 text-base text-gray-700 line-clamp-3">
+                {(project.description || "No description yet, but it won't be long?")
                   ?.split("\n")
                   .map((sentence, index) => (
                     <React.Fragment key={sentence + index}>
@@ -75,26 +141,29 @@ export default function Index() {
                     </React.Fragment>
                   ))}
               </p>
-              <Link
-                to={`/project/${project._id}`}
-                className=" inline-block rounded bg-gray-600 px-6 py-2.5 text-xs font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-gray-700 hover:shadow-lg focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg"
-              >
+              <p className="inline-block w-full bg-black px-6 py-4 text-center text-xs font-medium uppercase leading-tight text-white transition duration-150 ease-in-out hover:bg-gray-700 hover:shadow-lg focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg">
                 🏎️ Go !
-              </Link>
+              </p>
             </div>
-          </div>
+          </Link>
         ))}
         <newProjectFetcher.Form
           method="post"
           id="new-form"
-          className="flex shrink-0 basis-full flex-col justify-between md:basis-1/4"
+          className="flex shrink-0 basis-full cursor-pointer flex-col justify-between md:basis-1/4"
+          onClick={(e) => {
+            // submit the form
+            console.log(e.currentTarget.submit());
+          }}
         >
-          <div className="m-auto block w-full max-w-sm rounded-lg bg-white p-6 drop-shadow-lg md:m-0">
-            <h5 className="mb-2 text-xl font-medium leading-tight text-gray-900">+ Nouveau projet</h5>
-            <p className="mb-4 text-base text-gray-700">Cliquez ici pour commencer un nouveau projet !</p>
+          <div className="m-auto block w-full max-w-sm border-2 bg-white md:m-0 md:min-w-xs">
+            <h5 className="p-6 text-xl font-medium leading-tight text-gray-900">+ New project</h5>
+            <p className="mb-0 h-24 px-6 py-2 text-base text-gray-700 line-clamp-3">
+              Click here to start a new project{projects.length === 0 ? " and see what Froadmap is all about!" : "!"}
+            </p>
             <button
               type="submit"
-              className=" inline-block rounded bg-gray-600 px-6 py-2.5 text-xs font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-gray-700 hover:shadow-lg focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg"
+              className="inline-block w-full bg-black px-6 py-4 text-center text-xs font-medium uppercase leading-tight text-white transition duration-150 ease-in-out hover:bg-gray-700 hover:shadow-lg focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg"
             >
               🏎️ Go !
             </button>

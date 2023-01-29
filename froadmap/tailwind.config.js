@@ -32,9 +32,13 @@ module.exports = {
       height: {
         "screen-4/5": "80vh",
         "screen-1/2": "50vh",
+        18: "4.5rem",
       },
       minHeight: {
         "screen-1/2": "50vh",
+      },
+      minWidth: {
+        xs: "20rem",
       },
     },
   },
