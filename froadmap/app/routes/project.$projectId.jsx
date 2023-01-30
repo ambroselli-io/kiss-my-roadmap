@@ -17,7 +17,7 @@ import { action as actionLogout } from "./action.logout";
 import TopMenu from "~/components/TopMenu";
 import { defaultFeatures } from "~/utils/defaultFeatures.server";
 import EventModel from "~/db/models/event.server";
-// import { useUserEvent } from "~/utils/useUserEvent";
+import { usePageLoadedEvent } from "./action.event";
 
 export const action = async ({ request, params }) => {
   const formData = await request.formData();
@@ -388,16 +388,10 @@ export default function Index() {
     }
   }, [project, user, navigate, location.pathname]);
 
-  // const sendUserEvent = useUserEvent();
-  // useEffect(() => {
-  //   console.log("inside");
-  //   sendUserEvent({
-  //     event: "PROJECT OPENED",
-  //     projectId: project._id,
-  //   });
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [project?._id]);
+  usePageLoadedEvent({
+    event: "PROJECT PAGE LOADED",
+    projectId: project._id,
+  });
 
   return (
     <>

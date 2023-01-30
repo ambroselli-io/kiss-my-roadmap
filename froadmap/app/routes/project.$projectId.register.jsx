@@ -10,6 +10,7 @@ import PasswordInput from "~/components/PasswordInput";
 import OpenInNewWindowIcon from "~/components/icons/OpenInNewWindowIcon";
 import { getPasswordStrengthInTime } from "~/utils/passwordStrength.client";
 import EventModel from "~/db/models/event.server";
+import { usePageLoadedEvent, useUserEvent } from "./action.event";
 
 export const action = async ({ request }) => {
   const formData = await request.formData();
@@ -133,8 +134,14 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const onSwitchSigninUp = () => {
+    sendUserEvent({ event: `REGISTER SWITCH TO ${page === "signup" ? "signin" : "signup"}` });
     setPage((prev) => (prev === "signup" ? "signin" : "signup"));
   };
+
+  const sendUserEvent = useUserEvent();
+  usePageLoadedEvent({
+    event: "REGISTER PAGE LOADED",
+  });
 
   return (
     <ModalContainer open onClose={onClose} blurryBackground>
@@ -185,6 +192,7 @@ const Register = () => {
                 <label htmlFor="password">Password</label>
                 <button
                   onClick={() => {
+                    sendUserEvent({ event: "REGISTER FORGOT PASSWORD CLICKED" });
                     alert("Oups... I'm working on it! Contact me on Twitter at @ambroselli_io if you need it now!");
                   }}
                   className="text-xs"

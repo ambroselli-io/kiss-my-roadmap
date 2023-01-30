@@ -7,6 +7,7 @@ import ProjectModel from "~/db/models/project.server";
 import { useMemo, useState } from "react";
 import EventModel from "~/db/models/event.server";
 import { getUserFromCookie } from "~/services/auth.server";
+import { usePageLoadedEvent } from "./action.event";
 
 export const action = async ({ request, params }) => {
   const user = await getUserFromCookie(request);
@@ -49,6 +50,11 @@ const ProjectUsers = () => {
   };
   const data = useOutletContext();
   const { project, user } = data;
+
+  usePageLoadedEvent({
+    event: "PROJECTS PAGE LOADED",
+    projectId: project._id,
+  });
 
   const { users } = project;
   const transition = useTransition();

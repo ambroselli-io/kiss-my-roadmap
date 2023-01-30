@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { redirect } from "@remix-run/node";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import ProjectModel from "~/db/models/project.server";
@@ -8,7 +8,7 @@ import { action as actionLogout } from "./action.logout";
 import FeatureModel from "~/db/models/feature.server";
 import { defaultFeatures } from "~/utils/defaultFeatures.server";
 import EventModel from "~/db/models/event.server";
-// import { useUserEvent } from "~/utils/useUserEvent";
+import { usePageLoadedEvent, useUserEvent } from "./action.event";
 
 export const action = async ({ request }) => {
   const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
@@ -68,7 +68,10 @@ export default function Index() {
   const { projects, user, features } = useLoaderData();
   const newProjectFetcher = useFetcher();
 
-  // const sendUserEvent = useUserEvent();
+  const sendUserEvent = useUserEvent();
+  usePageLoadedEvent({
+    event: "PROJECTS PAGE LOADED",
+  });
 
   const colors = [
     ["#2A9D8F", "#000"],
@@ -99,6 +102,12 @@ export default function Index() {
           <Link
             to={`/project/${project._id}`}
             key={project._id}
+            onClick={() => {
+              sendUserEvent({
+                event: "PROJECTS OPEN PROJECT",
+                projectId: project._id,
+              });
+            }}
             className="flex shrink-0 basis-full flex-col justify-between md:basis-1/4"
           >
             <div className="m-auto block w-full max-w-sm border-2 bg-white md:m-0 md:min-w-xs">
@@ -153,3 +162,8 @@ export default function Index() {
     </div>
   );
 }
+
+export const shouldRevalidate = (props) => {
+  console.log("shouldRevalidate _index", props);
+  return false;
+};
