@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import { Outlet, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
+import { Outlet, useActionData, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
 import { json, redirect } from "@remix-run/node";
@@ -67,8 +67,16 @@ export const action = async ({ request, params }) => {
     return redirect(`/project/${projectId}`);
   }
 
+  const project = await ProjectModel.findById(projectId);
+  if (!project) {
+    return json({ ok: false }, { status: 404 });
+  }
+  if (!project.users.find((u) => user._id.equals(u.user))) {
+    console.log("OK MAN");
+    return json({ ok: false }, { status: 403 });
+  }
+
   if (formData.get("action") === "sort") {
-    const project = await ProjectModel.findById(projectId);
     if (formData.get("sortBy")) project.sortBy = formData.get("sortBy");
     if (formData.get("sortOrder")) project.sortOrder = formData.get("sortOrder");
     if (!project.sortOrder) project.sortOrder = "ASC";
@@ -83,7 +91,6 @@ export const action = async ({ request, params }) => {
   }
 
   if (formData.get("action") === "filter") {
-    const project = await ProjectModel.findById(projectId);
     const statusToToggle = formData.get("status");
     if (project.filteredStatuses.includes(statusToToggle)) {
       project.filteredStatuses = project.filteredStatuses.filter((status) => status !== statusToToggle);
@@ -149,7 +156,6 @@ export const action = async ({ request, params }) => {
   }
 
   if (formData.get("action") === "updateProject") {
-    const project = await ProjectModel.findById(projectId);
     if (formData.get("title")) project.title = formData.get("title");
     if (formData.get("description")) project.description = formData.get("description");
     await project.save();
@@ -169,7 +175,6 @@ export const action = async ({ request, params }) => {
 
   if (formData.get("featureId")) {
     const feature = await FeatureModel.findById(formData.get("featureId"));
-    const project = await ProjectModel.findById(projectId);
     if (!feature) return json({ ok: false });
     if (formData.get("content") && formData.get("content") !== feature.content) {
       feature.content = formData.get("content");
@@ -272,14 +277,19 @@ export const loader = async ({ request, params }) => {
       event: "PROJECT LOAD WITH NO USER",
       user: user?._id,
     });
-    return {
-      project: {
-        ...project?.toObject(),
-        description: "",
-      },
-      features: [{ status: "__new" }],
-      user: null,
-    };
+    if (!project.isPubliclyReadable) {
+      return {
+        project: {
+          ...project?.toObject(),
+          description: "",
+        },
+        features: [{ status: "__new" }],
+        user: null,
+      };
+    }
+  }
+  if (!project.isPubliclyReadable && !project?.users?.find(({ user: userId }) => userId === user._id)) {
+    return redirect("/");
   }
   const features = await FeatureModel.find({
     project: projectId,
@@ -357,6 +367,7 @@ export const meta = ({ data }) => {
 
 export default function Index() {
   const data = useLoaderData();
+
   const { project, features, user } = data;
 
   const { sortBy, sortOrder } = project;
@@ -377,14 +388,13 @@ export default function Index() {
     [sortBy, sortOrder, submit]
   );
 
+  // const actionData = useActionData();
+  // console.log("actionData", actionData); // undefined...
   const navigate = useNavigate();
   const location = useLocation();
   useEffect(() => {
     if (!user?._id && !!project?._id && !location.pathname.includes("register")) {
       navigate("register");
-    }
-    if (!!user?._id && !!project?._id && !project?.users?.find(({ user: userId }) => userId === user._id)) {
-      navigate("/");
     }
   }, [project, user, navigate, location.pathname]);
 

@@ -1,13 +1,13 @@
 export const defaultFeatures = [
   {
-    content: "[example/reminder] LAUNCH PROJECT",
+    content: "LAUNCH PROJECT",
     businessValue: "XL",
     priority: "YES",
     devCost: "S",
     status: "NOTREADYYET",
   },
   {
-    content: "[example/reminder] Market my project",
+    content: "Market my product",
     businessValue: "XL",
     priority: "YES",
     devCost: "M",

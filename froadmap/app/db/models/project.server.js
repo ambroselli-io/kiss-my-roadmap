@@ -20,6 +20,8 @@ const Schema = new mongoose.Schema(
     deletedAt: { type: Date },
     deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    isPubliclyReadable: { type: Boolean, default: false },
+    isPubliclyWritable: { type: Boolean, default: false },
     users: [
       {
         type: {
