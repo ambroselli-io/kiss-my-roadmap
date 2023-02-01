@@ -1,17 +1,17 @@
 import { json } from "@remix-run/node";
 import EventModel from "~/db/models/event.server";
 import { getUnauthentifiedUserFromCookie } from "~/services/auth.server";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useFetcher } from "@remix-run/react";
-import { useRef } from "react";
 
 export const action = async ({ request }) => {
   const user = await getUnauthentifiedUserFromCookie(request);
   const formData = await request.formData();
+  console.log(formData.get("projectId"));
   const eventObject = {
     event: formData.get("event"),
     value: formData.get("value") ?? undefined,
-    project: formData.get("projectId") ?? undefined,
+    project: formData.get("projectId") === "new-project" ? undefined : formData.get("projectId") ?? undefined,
     feature: formData.get("featureId") ?? undefined,
     user: user?._id ?? undefined,
   };

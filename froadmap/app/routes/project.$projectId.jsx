@@ -30,7 +30,6 @@ export const action = async ({ request, params }) => {
     EventModel.create({
       event: "PROJECT LOGOUT",
       user: user._id,
-      project: projectId,
     });
     return await actionLogout({ request, to: "/project/new-project/register" });
   }

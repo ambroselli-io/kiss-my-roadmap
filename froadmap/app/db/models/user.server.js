@@ -11,10 +11,10 @@ const Schema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       unique: true,
-      required: "Email address is required",
       match: [/^.+@(?:[\w-]+\.)+\w+$/, "Please fill a valid email address"],
       sparse: true,
     },
+    username: { type: String },
     password: { type: String },
     name: { type: String },
     job: { type: String },
@@ -40,9 +40,7 @@ const Schema = new mongoose.Schema(
 Schema.methods.me = function () {
   return {
     _id: this._id,
-    firstName: this.firstName,
-    lastName: this.lastName,
-    job: this.job,
+    username: this.username,
     email: this.email,
     organisations: this.organisations,
     helpSettings: this.helpSettings,
@@ -50,17 +48,5 @@ Schema.methods.me = function () {
 };
 
 const UserModel = dbConnection.models[MODELNAME] || dbConnection.model(MODELNAME, Schema);
-
-if (process.env.NODE_ENV === "production") {
-  Schema.index({ email: "text" });
-  UserModel.syncIndexes();
-} else {
-  // global.__syncIndexes = global.__syncIndexes.filter((i) => i !== MODELNAME);
-  if (!global.__syncIndexes.includes(MODELNAME)) {
-    global.__syncIndexes.push(MODELNAME);
-    Schema.index({ email: "text" });
-    UserModel.syncIndexes();
-  }
-}
 
 export default UserModel;

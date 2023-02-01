@@ -100,9 +100,9 @@ const TopMenu = () => {
             ) : (
               <>
                 Logout{" "}
-                {!!user?.email && (
+                {(!!user?.email || !!user?.username) && (
                   <>
-                    <span className="hidden md:inline">({user.email})</span>
+                    <span className="hidden md:inline">({user.email || user.username})</span>
                   </>
                 )}
               </>

@@ -24,6 +24,7 @@ dbConnection.once("open", async () => {
   console.log("\x1b[1m%s\x1b[0m", `${MONGODB_DB_NAME} connected`);
   const migrations = await import("./migrations.server");
   migrations.migrate();
+  // console.log(await dbConnection.collections.users?.getIndexes?.());
 });
 
 export default dbConnection;

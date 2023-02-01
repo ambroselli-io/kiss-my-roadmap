@@ -16,11 +16,12 @@ export const action = async ({ request }) => {
   const formData = await request.formData();
   const page = formData.get("page");
   const email = formData.get("email");
-  if (!email?.length) {
+  const username = formData.get("username");
+  if (!email?.length && !username?.length) {
     EventModel.create({
       event: "REGISTER NO EMAIL PROVIDED",
     });
-    return json({ ok: false, errorField: "email", error: "No email, no chocolate." }, { status: 400 });
+    return json({ ok: false, errorField: "email", error: "No email/username, no chocolate." }, { status: 400 });
   }
   const password = formData.get("password");
   if (!password) {
@@ -31,7 +32,7 @@ export const action = async ({ request }) => {
   }
 
   if (page === "signup") {
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email, username });
     if (existingUser?.password?.length > 0) {
       EventModel.create({
         event: "REGISTER SIGNUP EMAIL ALREADY REGISTERED",
@@ -41,7 +42,7 @@ export const action = async ({ request }) => {
         {
           ok: false,
           errorField: "email",
-          error: "This email is already registered in our database. Please signin instead!",
+          error: "This credential is already registered in our database. Please signin instead!",
         },
         { status: 400 }
       );
@@ -50,13 +51,13 @@ export const action = async ({ request }) => {
     if (password !== confirmPassword) {
       EventModel.create({
         event: "REGISTER SIGNUP PASSWORDS DON'T MATCH",
-        user: existingUser._id,
+        value: email || username,
       });
       return json({ ok: false, errorField: "confirm-password", error: "Passwords don't match!" }, { status: 400 });
     }
 
     const user = await UserModel.findOneAndUpdate(
-      { email },
+      { email, username },
       { password: await bcrypt.hash(password, 10) },
       { upsert: true, returnDocument: "after" }
     );
@@ -64,19 +65,23 @@ export const action = async ({ request }) => {
     const cookieToSet = await createUserSession(request, user);
     EventModel.create({
       event: "REGISTER SIGNUP SUCCESS",
-      user: existingUser._id,
+      user: user?._id,
     });
     return json({ ok: true, data: user.me() }, { status: 200, headers: { "Set-Cookie": cookieToSet } });
   }
   if (page === "signin") {
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({ email, username });
     if (!user) {
       EventModel.create({
         event: "REGISTER SIGNIN EMAIL NOT FOUND",
-        value: email,
+        value: email || username,
       });
       return json(
-        { ok: false, errorField: "email", error: "This email doesn't exist in our database. Please signup instead!" },
+        {
+          ok: false,
+          errorField: "email",
+          error: "This email/username doesn't exist in our database. Please signup instead!",
+        },
         { status: 400 }
       );
     }
@@ -85,14 +90,14 @@ export const action = async ({ request }) => {
     if (!passwordMatched) {
       EventModel.create({
         event: "REGISTER SIGNIN PASSWORD NOT MATCH",
-        value: email,
+        user,
       });
       return json({ ok: false, errorField: "password", error: "This password doesn't match!" }, { status: 400 });
     }
     const cookieToSet = await createUserSession(request, user);
     EventModel.create({
       event: "REGISTER SIGNIN SUCCESS",
-      value: email,
+      user,
     });
     return json({ ok: true, data: user.me() }, { status: 200, headers: { "Set-Cookie": cookieToSet } });
   }
@@ -131,6 +136,8 @@ const Register = () => {
     return "signup";
   });
 
+  const [credential, setCredential] = useState("email");
+  const [showEmailAlert, setShowEmailAlert] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const onSwitchSigninUp = () => {
@@ -152,18 +159,41 @@ const Register = () => {
             <input type="hidden" name="page" value={page} />
             <div className="mb-3 flex flex-col-reverse gap-2">
               <input
-                name="email"
-                type="email"
-                id="email"
+                name={credential === "email" ? "email" : "username"}
+                type={credential === "email" ? "email" : "text"}
+                id={credential === "email" ? "email" : "username"}
                 className="outline-main block w-full rounded border border-black bg-transparent p-2.5 text-black transition-all"
-                autoComplete="email"
+                autoComplete={credential === "email" ? "email" : "username"}
                 placeholder="ilike@froadmaps.com"
                 defaultValue={typeof window !== "undefined" ? window.localStorage.getItem("last-login-email") : ""}
                 onChange={(e) => {
                   if (showErrors) setShowErrors(false);
                 }}
               />
-              <label htmlFor="email">Email</label>
+              <div className="flex items-baseline justify-between">
+                <label htmlFor="email">{credential === "email" ? "Email" : "Username"}</label>
+                <button
+                  onClick={() => {
+                    if (!showEmailAlert && page === "signup") return setShowEmailAlert(true);
+                    const newCredential = credential === "email" ? "username" : "email";
+                    if (newCredential === "username")
+                      sendUserEvent({ event: `REGISTER PREFER ${newCredential.toUpperCase()}` });
+                    setCredential(newCredential);
+                  }}
+                  className="text-xs"
+                  type="button"
+                >
+                  {showEmailAlert ? (credential === "username" ? "I " : "I know, I really ") : "I "}prefer{" "}
+                  {credential === "email" ? "no email" : "email"}
+                </button>
+              </div>
+              {credential === "email" && showEmailAlert && (
+                <p className="help-block relative m-2 hidden rounded border-2 border-yellow-400 bg-yellow-100 p-2 text-center text-gray-400 md:block">
+                  Don't worry, I have no plan to send you any emails afterwards. This is just for protecting your data
+                  with a password, and for you to be able to recover that password if you've lost it. If you really
+                  choose an anonymous username, I won't be able to help you recover your password.
+                </p>
+              )}
             </div>
             <p
               className={[
