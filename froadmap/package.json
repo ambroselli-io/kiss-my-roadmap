@@ -13,7 +13,7 @@
     "dev:remix": "remix dev",
     "dev:css": "tailwindcss -w -i ./app/styles/tailwind.css -o ./app/styles/tailwind-compiled.css",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "source .env && remix-serve build",
+    "start": "remix-serve build",
     "clean-build-and-cache": "rm -rf ./.cache && rm -rf ./build && rm -rf ./public/build",
     "clean": "npm run clean-build-and-cache && npm install && npm run postinstall"
   },
