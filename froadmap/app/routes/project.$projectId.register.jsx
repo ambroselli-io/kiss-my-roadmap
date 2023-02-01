@@ -144,7 +144,7 @@ const Register = () => {
   });
 
   return (
-    <ModalContainer open onClose={onClose} blurryBackground>
+    <ModalContainer open={!searchParams.get("onboarding")} onClose={onClose} blurryBackground>
       <ModalHeader title="Let's get to know each other!" />
       <ModalBody className="!pb-0">
         <Form method="POST" className="px-4 pt-4" id="register-form">

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import { Outlet, useActionData, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
+import { Outlet, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
 import { json, redirect } from "@remix-run/node";
@@ -17,6 +17,7 @@ import { action as actionLogout } from "./action.logout";
 import TopMenu from "~/components/TopMenu";
 import { defaultFeatures } from "~/utils/defaultFeatures.server";
 import EventModel from "~/db/models/event.server";
+import OnboardModal from "~/components/OnboardModal";
 import { usePageLoadedEvent } from "./action.event";
 
 export const action = async ({ request, params }) => {
@@ -482,6 +483,7 @@ export default function Index() {
         </main>
       </div>
       <Outlet context={data} />
+      <OnboardModal />
     </>
   );
 }

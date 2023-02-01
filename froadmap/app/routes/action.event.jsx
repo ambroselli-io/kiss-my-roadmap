@@ -3,6 +3,7 @@ import EventModel from "~/db/models/event.server";
 import { getUnauthentifiedUserFromCookie } from "~/services/auth.server";
 import { useCallback, useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
+import { useRef } from "react";
 
 export const action = async ({ request }) => {
   const user = await getUnauthentifiedUserFromCookie(request);
@@ -23,6 +24,7 @@ export const useUserEvent = () => {
   return useCallback(
     ({ event, value, projectId, featureId }) => {
       if (!event) return;
+      console.log("sendUserEvent", { event, value, projectId, featureId });
       const formData = new FormData();
       formData.append("event", event);
       if (value) formData.append("value", value);
@@ -37,7 +39,12 @@ export const useUserEvent = () => {
 export const usePageLoadedEvent = ({ event, value, projectId, featureId }) => {
   const sendUserEvent = useUserEvent();
 
+  const sent = useRef(false);
+
   useEffect(() => {
-    sendUserEvent({ event, value, projectId, featureId });
+    if (!sent.current || sent.current !== JSON.stringify({ event, value, projectId, featureId })) {
+      sendUserEvent({ event, value, projectId, featureId });
+      sent.current = JSON.stringify({ event, value, projectId, featureId });
+    }
   }, []);
 };
