@@ -7,7 +7,6 @@ import { useFetcher } from "@remix-run/react";
 export const action = async ({ request }) => {
   const user = await getUnauthentifiedUserFromCookie(request);
   const formData = await request.formData();
-  console.log(formData.get("projectId"));
   const eventObject = {
     event: formData.get("event"),
     value: formData.get("value") ?? undefined,
@@ -24,7 +23,9 @@ export const useUserEvent = () => {
   return useCallback(
     ({ event, value, projectId, featureId }) => {
       if (!event) return;
-      console.log("sendUserEvent", { event, value, projectId, featureId });
+      if (process.env.NODE_ENV !== "production") {
+        console.log("sendUserEvent", { event, value, projectId, featureId });
+      }
       const formData = new FormData();
       formData.append("event", event);
       if (value) formData.append("value", value);

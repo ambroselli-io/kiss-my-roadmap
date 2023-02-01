@@ -142,7 +142,7 @@ export default function Index() {
           className="flex shrink-0 basis-full cursor-pointer flex-col justify-between md:basis-1/4"
           onClick={(e) => {
             // submit the form
-            console.log(e.currentTarget.submit());
+            e.currentTarget.submit();
           }}
         >
           <div className="m-auto block w-full max-w-sm border-2 bg-white md:m-0 md:min-w-xs">
@@ -164,6 +164,5 @@ export default function Index() {
 }
 
 export const shouldRevalidate = (props) => {
-  console.log("shouldRevalidate _index", props);
   return false;
 };

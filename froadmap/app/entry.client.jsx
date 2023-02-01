@@ -4,7 +4,6 @@ import { startTransition, StrictMode, useEffect } from "react";
 import { hydrateRoot } from "react-dom/client";
 
 if (process.env.NODE_ENV === "production") {
-  console.log("init sentry client", window.ENV.SENTRY_XXX);
   Sentry.init({
     dsn: window.ENV.SENTRY_XXX,
     tracesSampleRate: 1,

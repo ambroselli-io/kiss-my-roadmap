@@ -5,7 +5,6 @@ import HelpBlock from "./HelpBlock";
 
 export const action = async ({ formData, projectId }) => {
   if (formData.get("action") === "updateProject") {
-    console.log("ProjectMetadata", projectId);
     const project = await ProjectModel.findById(projectId);
     if (formData.get("title")) project.title = formData.get("title");
     if (formData.get("description")) project.description = formData.get("description");

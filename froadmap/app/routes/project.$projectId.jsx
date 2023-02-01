@@ -72,7 +72,6 @@ export const action = async ({ request, params }) => {
     return json({ ok: false }, { status: 404 });
   }
   if (!project.users.find((u) => user._id.equals(u.user))) {
-    console.log("OK MAN");
     return json({ ok: false }, { status: 403 });
   }
 
@@ -389,8 +388,6 @@ export default function Index() {
     [sortBy, sortOrder, submit]
   );
 
-  // const actionData = useActionData();
-  // console.log("actionData", actionData); // undefined...
   const navigate = useNavigate();
   const location = useLocation();
   useEffect(() => {
