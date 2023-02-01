@@ -289,7 +289,8 @@ export const loader = async ({ request, params }) => {
       };
     }
   }
-  if (!project.isPubliclyReadable && !project?.users?.find(({ user: userId }) => userId === user._id)) {
+
+  if (!project.isPubliclyReadable && !project?.users?.find(({ user: userId }) => user._id.equals(userId))) {
     return redirect("/");
   }
   const features = await FeatureModel.find({

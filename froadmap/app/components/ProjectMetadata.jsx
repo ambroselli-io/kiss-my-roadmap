@@ -22,9 +22,8 @@ const ProjectMetadata = () => {
   const [editTitle, setEditTitle] = useState(!project.title);
   const submitMetadata = (e) => {
     if (String(e.target.value || "") === String(project[e.target.name] || "")) return;
-    const formData = new FormData();
+    const formData = new FormData(e.target.form);
     formData.append("action", "updateProject");
-    formData.append(e.target.name, e.target.value);
     submit(formData, { method: "POST", replace: true });
     setEditTitle(false);
   };
