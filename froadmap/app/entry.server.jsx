@@ -8,9 +8,16 @@ import * as Sentry from "@sentry/remix";
 import { SENTRY_XXX, ENVIRONMENT } from "~/config.server";
 
 if (process.env.NODE_ENV === "production") {
+  console.log("init sentry server", SENTRY_XXX, `api-${ENVIRONMENT}`);
   Sentry.init({
     dsn: SENTRY_XXX,
+    tracesSampleRate: 1,
     environment: `api-${ENVIRONMENT}`,
+    integrations: [
+      new Sentry.Integrations.Mongo({
+        useMongoose: true,
+      }),
+    ],
   });
 }
 

@@ -4,7 +4,6 @@ import { ENVIRONMENT } from "~/config.server";
 // https://docs.sentry.io/platforms/javascript/enriching-events/context/#example-usages
 
 export const capture = (err, context = {}) => {
-  console.log("lol");
   if (typeof context === "string") {
     context = JSON.parse(context);
   } else {

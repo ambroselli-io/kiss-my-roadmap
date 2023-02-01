@@ -78,6 +78,18 @@ const TopMenu = () => {
               )}
             </>
           )}
+          <Form
+            method="post"
+            action="/action/bug"
+            className="ml-auto inline-flex items-center gap-1 py-2 px-4"
+            onSubmit={() => {
+              throw new Error("test sentry front");
+            }}
+          >
+            <button value="true" name="bug" type="submit">
+              Bug
+            </button>
+          </Form>
           <Form method="get" className="ml-auto inline-flex items-center gap-1 py-2 px-4" id="contact-modal">
             <button value="true" name="show-contact-modal" type="submit">
               Contact
