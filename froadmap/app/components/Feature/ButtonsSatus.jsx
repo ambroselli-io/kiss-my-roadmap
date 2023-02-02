@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 export const ButtonsSatus = ({ feature, name = "status", featureFetcher, form, className = "" }) => {
   const selected = useMemo(() => {
-    if (feature.status === "__new") return "NOTREADYYET";
+    if (feature.status === "__new") return "";
     if (["loading", "submitting"].includes(featureFetcher.state)) {
       if (featureFetcher.submission.formData?.get("featureId") !== feature._id) return feature[name];
       const newValue = featureFetcher.submission.formData?.get(name);

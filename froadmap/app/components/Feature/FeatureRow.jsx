@@ -1,4 +1,4 @@
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import HelpBlock from "../HelpBlock";
 import OpenTrash from "../OpenTrash";
 import { Score } from "./Score";
@@ -8,6 +8,8 @@ import { ButtonsXSToXL } from "./ButtonsXSToXL";
 
 export const FeatureRow = ({ feature, index, className }) => {
   const featureRowFetcher = useFetcher();
+  const data = useLoaderData();
+  const { project } = data;
 
   const formId = `feature-row-${feature._id}`;
 
@@ -58,9 +60,22 @@ export const FeatureRow = ({ feature, index, className }) => {
           }
           name="content"
           form={formId}
+          autoFocus={
+            !!project?.title?.length && (feature._id === "optimistic-new-feature-id" || feature.status === "__new")
+          }
           className="h-full w-full p-1"
           onBlur={(e) => {
-            featureRowFetcher.submit(e.target.form, { method: "post", replace: false });
+            const form = new FormData(e.target.form);
+            if (feature.status === "__new") form.append("action", "createFeature");
+            featureRowFetcher.submit(form, { method: "post", replace: false });
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== "ArrowDown") return;
+            if (feature.status !== "__new") return;
+            if (!e.target.value.length) return;
+            if (e.target.selectionStart !== e.target.value.length) return;
+            e.preventDefault();
+            e.target.blur();
           }}
         />
       </div>

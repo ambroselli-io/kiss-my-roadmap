@@ -105,7 +105,7 @@ export const action = async ({ request }) => {
     if (projects === 0) {
       return json({ ok: true, data: user.me() }, { status: 200, headers: { "Set-Cookie": cookieToSet } });
     } else {
-      redirect("/");
+      return redirect("/", { headers: { "Set-Cookie": cookieToSet } });
     }
   }
 };

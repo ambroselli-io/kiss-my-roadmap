@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from "react";
-import { Outlet, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { Outlet, useFetchers, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
 import FeatureModel from "~/db/models/feature.server";
 import ProjectModel from "~/db/models/project.server";
 import { json, redirect } from "@remix-run/node";
@@ -120,6 +120,7 @@ export const action = async ({ request, params }) => {
 
   if (formData.get("action") === "deleteProject") {
     await ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date(), deletedBy: user._id });
+    await FeatureModel.updateMany({ project: projectId }, { deletedAt: new Date(), deletedBy: user._id });
     EventModel.create({
       event: "PROJECT DELETE PROJECT",
       user: user._id,
@@ -367,8 +368,32 @@ export const meta = ({ data }) => {
 
 export default function Index() {
   const data = useLoaderData();
+  const fetchers = useFetchers();
+  const { project, user } = data;
 
-  const { project, features, user } = data;
+  const features = useMemo(() => {
+    let isSubmittingNewFeature = false;
+    for (const fetcher of fetchers) {
+      if (fetcher?.formData?.get("action") === "createFeature") {
+        isSubmittingNewFeature = fetcher?.formData?.get("content")?.trim?.()?.length > 0;
+        break;
+      }
+    }
+    if (isSubmittingNewFeature) {
+      return [...data.features, { _id: "optimistic-new-feature-id", status: "__new" }];
+    }
+    return data.features;
+  }, [fetchers, data.features]);
+
+  const featuresContainer = useRef(null);
+  useEffect(() => {
+    if (features[features.length - 1]?._id === "optimistic-new-feature-id") {
+      // smooth scroll window to bottom
+      setTimeout(() => {
+        featuresContainer.current.scrollTo({ top: featuresContainer.current.scrollHeight, behavior: "smooth" });
+      }, 100);
+    }
+  }, [features]);
 
   const { sortBy, sortOrder } = project;
 
@@ -403,7 +428,11 @@ export default function Index() {
 
   return (
     <>
-      <div className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto" key={project._id}>
+      <div
+        ref={featuresContainer}
+        className="relative flex h-full max-h-full w-full max-w-full flex-col overflow-auto"
+        key={project._id}
+      >
         <TopMenu />
         <main className="flex flex-1 basis-full flex-col justify-start pb-4 text-xs md:pb-8">
           <ProjectMetadata />

@@ -63,7 +63,17 @@ export const FeatureCard = ({ feature, index, className }) => {
           form={formId}
           className={["h-full w-full p-1", feature.status === "__new" ? "" : "font-bold focus:font-normal"].join(" ")}
           onBlur={(e) => {
-            featureCardFetcher.submit(e.target.form, { method: "post", replace: false });
+            const form = new FormData(e.target.form);
+            if (feature.status === "__new") form.append("action", "createFeature");
+            featureCardFetcher.submit(form, { method: "post", replace: false });
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== "ArrowDown") return;
+            if (feature.status !== "__new") return;
+            if (!e.target.value.length) return;
+            if (e.target.selectionStart !== e.target.value.length) return;
+            e.preventDefault();
+            e.target.blur();
           }}
         />
       </div>
