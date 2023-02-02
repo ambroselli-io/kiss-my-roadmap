@@ -11,6 +11,8 @@ import OpenInNewWindowIcon from "~/components/icons/OpenInNewWindowIcon";
 import { getPasswordStrengthInTime } from "~/utils/passwordStrength.client";
 import EventModel from "~/db/models/event.server";
 import { usePageLoadedEvent, useUserEvent } from "./action.event";
+import ProjectModel from "~/db/models/project.server";
+import { redirect } from "@remix-run/node";
 
 export const action = async ({ request }) => {
   const formData = await request.formData();
@@ -99,7 +101,12 @@ export const action = async ({ request }) => {
       event: "REGISTER SIGNIN SUCCESS",
       user,
     });
-    return json({ ok: true, data: user.me() }, { status: 200, headers: { "Set-Cookie": cookieToSet } });
+    const projects = await ProjectModel.countDocuments({ "users.user": user._id });
+    if (projects === 0) {
+      return json({ ok: true, data: user.me() }, { status: 200, headers: { "Set-Cookie": cookieToSet } });
+    } else {
+      redirect("/");
+    }
   }
 };
 

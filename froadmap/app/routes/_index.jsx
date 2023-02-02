@@ -162,7 +162,3 @@ export default function Index() {
     </div>
   );
 }
-
-export const shouldRevalidate = (props) => {
-  return false;
-};
