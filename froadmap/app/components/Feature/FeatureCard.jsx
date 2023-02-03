@@ -6,7 +6,7 @@ import { ButtonsYesNo } from "./ButtonsYesNo";
 import { ButtonsXSToXL } from "./ButtonsXSToXL";
 import { useState } from "react";
 
-export const FeatureCard = ({ feature, index, className }) => {
+export const FeatureCard = ({ allowScrollToNewFeature, feature, index, className }) => {
   const [showTrash, setShowTrash] = useState(false);
 
   const featureCardFetcher = useFetcher();
@@ -61,6 +61,9 @@ export const FeatureCard = ({ feature, index, className }) => {
           }
           name="content"
           form={formId}
+          autoFocus={
+            allowScrollToNewFeature && (feature._id === "optimistic-new-feature-id" || feature.status === "__new")
+          }
           className={["h-full w-full p-1", feature.status === "__new" ? "" : "font-bold focus:font-normal"].join(" ")}
           onBlur={(e) => {
             const form = new FormData(e.target.form);

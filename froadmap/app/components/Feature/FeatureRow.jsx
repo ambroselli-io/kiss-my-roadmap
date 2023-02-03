@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import HelpBlock from "../HelpBlock";
 import OpenTrash from "../OpenTrash";
 import { Score } from "./Score";
@@ -6,10 +6,8 @@ import { ButtonsSatus } from "./ButtonsSatus";
 import { ButtonsYesNo } from "./ButtonsYesNo";
 import { ButtonsXSToXL } from "./ButtonsXSToXL";
 
-export const FeatureRow = ({ feature, index, className }) => {
+export const FeatureRow = ({ feature, index, className, allowScrollToNewFeature }) => {
   const featureRowFetcher = useFetcher();
-  const data = useLoaderData();
-  const { project } = data;
 
   const formId = `feature-row-${feature._id}`;
 
@@ -61,7 +59,7 @@ export const FeatureRow = ({ feature, index, className }) => {
           name="content"
           form={formId}
           autoFocus={
-            !!project?.title?.length && (feature._id === "optimistic-new-feature-id" || feature.status === "__new")
+            allowScrollToNewFeature && (feature._id === "optimistic-new-feature-id" || feature.status === "__new")
           }
           className="h-full w-full p-1"
           onBlur={(e) => {

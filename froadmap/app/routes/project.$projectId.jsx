@@ -371,6 +371,7 @@ export default function Index() {
   const fetchers = useFetchers();
   const { project, user } = data;
 
+  const featuresAdded = useRef(null);
   const features = useMemo(() => {
     let isSubmittingNewFeature = false;
     for (const fetcher of fetchers) {
@@ -380,6 +381,7 @@ export default function Index() {
       }
     }
     if (isSubmittingNewFeature) {
+      featuresAdded.current = true;
       return [...data.features, { _id: "optimistic-new-feature-id", status: "__new" }];
     }
     return data.features;
@@ -387,7 +389,7 @@ export default function Index() {
 
   const featuresContainer = useRef(null);
   useEffect(() => {
-    if (features[features.length - 1]?._id === "optimistic-new-feature-id") {
+    if (featuresAdded.current && features[features.length - 1]?._id === "optimistic-new-feature-id") {
       // smooth scroll window to bottom
       setTimeout(() => {
         featuresContainer.current.scrollTo({ top: featuresContainer.current.scrollHeight, behavior: "smooth" });
@@ -500,8 +502,18 @@ export default function Index() {
             {features.map((feature, index) => {
               return (
                 <React.Fragment key={feature._id || index}>
-                  <FeatureRow feature={feature} index={index} className="hidden md:grid" />
-                  <FeatureCard feature={feature} index={index} className="md:hidden" />
+                  <FeatureRow
+                    allowScrollToNewFeature={featuresAdded.current}
+                    feature={feature}
+                    index={index}
+                    className="hidden md:grid"
+                  />
+                  <FeatureCard
+                    allowScrollToNewFeature={featuresAdded.current}
+                    feature={feature}
+                    index={index}
+                    className="md:hidden"
+                  />
                 </React.Fragment>
               );
             })}
