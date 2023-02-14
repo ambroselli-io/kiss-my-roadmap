@@ -10,8 +10,8 @@ const defaultSort = (a, b, sortOrder) => {
 };
 
 const statusSort = {
-  TODO: 1,
-  INPROGRESS: 2,
+  INPROGRESS: 1,
+  TODO: 2,
   DONE: 3,
   NOTREADYYET: 4,
   KO: 5,
