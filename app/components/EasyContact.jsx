@@ -11,7 +11,7 @@ const EasyContact = ({ param }) => {
     <ModalContainer open={searchParams.get(param) === "true"} onClose={onClose} blurryBackground>
       <ModalHeader title="Thanks for reaching out!" />
       <ModalBody className="!p-8">
-        Froadmap is on MVP stage, so all features are not available yet.
+        💋 Kiss my Roadmap is on MVP stage, so all features are not available yet.
         <br />
         <br />
         If you want to get in touch with me for any reason (feedback, complain, feature request, questions, etc), please
@@ -19,7 +19,7 @@ const EasyContact = ({ param }) => {
         <ul className="list-inside list-disc">
           <li>
             send me an email at{" "}
-            <a className="text-blue-500 underline" href="mailto:arnaud@ambroselli.io?subject=About Froadmap">
+            <a className="text-blue-500 underline" href="mailto:arnaud@ambroselli.io?subject=About Kiss my Roadmap">
               arnaud@ambroselli.io
             </a>{" "}
           </li>

@@ -88,9 +88,11 @@ const ProjectMetadata = () => {
           <p className="mb-2 text-xs italic md:hidden">
             Note: the UX should be much better on desktop screens - table-based compared to card-based
           </p>
-          <h6 className="font-bold text-gray-600 !opacity-100">Welcome to Froadmap! What are you dealing with here?</h6>
+          <h6 className="font-bold text-gray-600 !opacity-100">
+            💋 Welcome to Kiss my Roadmap! What are you dealing with here?
+          </h6>
           <p>
-            Froadmap helps you optimize your product's features roadmap.
+            Kiss my Roadmap helps you optimize your product's features roadmap.
             <br />
             I know, there are plenty of tools out there, but this one is different.
             <br />

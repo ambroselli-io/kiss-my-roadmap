@@ -171,7 +171,7 @@ const Register = () => {
                 id={credential === "email" ? "email" : "username"}
                 className="outline-main block w-full rounded border border-black bg-transparent p-2.5 text-black transition-all"
                 autoComplete={credential === "email" ? "email" : "username"}
-                placeholder="ilike@froadmaps.com"
+                placeholder="ilike@roadmap.kiss-my.app"
                 defaultValue={typeof window !== "undefined" ? window.localStorage.getItem("last-login-email") : ""}
                 onChange={(e) => {
                   if (showErrors) setShowErrors(false);

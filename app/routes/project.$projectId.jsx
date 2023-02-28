@@ -341,7 +341,7 @@ export const loader = async ({ request, params }) => {
 export const meta = ({ data }) => {
   return [
     {
-      title: `${data?.project?.title || "New project"} | Froadmap`,
+      title: `${data?.project?.title || "New project"} | 💋 Kiss my Roadmap`,
     },
     {
       name: "description",
@@ -349,7 +349,7 @@ export const meta = ({ data }) => {
     },
     {
       name: "og:title",
-      content: `${data?.project?.title || "New project"} | Froadmap`,
+      content: `${data?.project?.title || "New project"} | 💋 Kiss my Roadmap`,
     },
     {
       name: "og:description",
@@ -357,7 +357,7 @@ export const meta = ({ data }) => {
     },
     {
       name: "twitter:title",
-      content: `${data?.project?.title || "New project"} | Froadmap`,
+      content: `${data?.project?.title || "New project"} | 💋 Kiss my Roadmap`,
     },
     {
       name: "twitter:description",

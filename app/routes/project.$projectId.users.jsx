@@ -111,7 +111,7 @@ const ProjectUsers = () => {
               type="email"
               autoFocus
               className="outline-main block w-full bg-transparent px-4 py-2.5 text-black transition-all"
-              placeholder="ilike@froadmaps.com"
+              placeholder="ilike@roadmap.kiss-my.app"
             />
             <button type="submit" className="bg-black  px-8 py-3 text-white">
               Add

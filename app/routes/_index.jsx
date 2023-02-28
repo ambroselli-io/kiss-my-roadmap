@@ -59,7 +59,7 @@ export const loader = async ({ request }) => {
 export const meta = () => {
   return [
     {
-      title: `My projects | Froadmap`,
+      title: `My projects | 💋 Kiss my Roadmap`,
     },
   ];
 };
@@ -90,7 +90,7 @@ export default function Index() {
     <div className="flex h-full max-h-full w-full max-w-full flex-col overflow-auto">
       <TopMenu />
       <h1 className="m-8 mt-16 text-4xl font-semibold md:mx-16 md:text-6xl">
-        Welcome to Froadmap, the table to make your feature's roadmaps!
+        Welcome to Kiss my Roadmap, the table to make your feature's roadmaps!
       </h1>
       {projects.length > 0 && (
         <p className="m-8 text-xl md:mx-16">
@@ -148,7 +148,8 @@ export default function Index() {
           <div className="m-auto block w-full max-w-sm border-2 bg-white md:m-0 md:min-w-xs">
             <h5 className="p-6 text-xl font-medium leading-tight text-gray-900">+ New project</h5>
             <p className="mb-0 h-24 px-6 py-2 text-base text-gray-700 line-clamp-3">
-              Click here to start a new project{projects.length === 0 ? " and see what Froadmap is all about!" : "!"}
+              Click here to start a new project
+              {projects.length === 0 ? " and see what Kiss my Roadmap is all about!" : "!"}
             </p>
             <button
               type="submit"

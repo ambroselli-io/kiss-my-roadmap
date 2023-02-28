@@ -36,11 +36,11 @@ const OnboardModal = () => {
 
   return (
     <ModalContainer open={isOpen} onClose={onClose} blurryBackground size="3xl">
-      <ModalHeader title={<span className="text-4xl">Welcome to Froadmap!</span>} />
+      <ModalHeader title={<span className="text-4xl">Welcome to Kiss my Roadmap 💋</span>} />
       <ModalBody className="!pb-0">
         <div className="flex flex-col gap-3 p-8">
           <p className="text-lg font-bold">
-            Froadmap is a free tool to make you prioritize all your planned features/tasks.
+            💋 Kiss my Roadmap is a free tool to make you prioritize all your planned features/tasks.
           </p>
           <p>The feature with the highest score is the one you should do.</p>
           <p>For each feature:</p>
