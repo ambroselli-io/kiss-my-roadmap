@@ -2,7 +2,7 @@ import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderD
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import "dayjs/locale/fr"; // use locale globally
-import tailwindStyles from "./styles/tailwind-compiled.css";
+import tailwindStyles from "./styles/tailwind.css";
 import globalStyles from "./styles/global.css";
 import resetStyles from "./styles/reset.css";
 import fontFace from "./styles/font.css";

@@ -11,6 +11,7 @@ const fields = [
 ];
 
 export const SortDropDown = ({ field, onClick, sortOrder, sortBy }) => {
+  return null;
   return (
     <div className="flex">
       <DropdownMenu

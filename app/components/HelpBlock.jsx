@@ -1,46 +1,29 @@
-import { useLoaderData, useSubmit, useTransition } from "@remix-run/react";
-import { useMemo } from "react";
-import EventModel from "~/db/models/event.server";
-import { availableHelp } from "~/utils/help.server";
+import { availableHelp } from "../utils/help.server";
+import { useSubmit } from "react-router-dom";
 
-export const helpAction = async ({ user, formData }) => {
+export const helpAction = async ({ formData }) => {
+  const userHelpSettings = JSON.parse(window.localStorage.getItem("userHelpSettings") || JSON.stringify(availableHelp));
   if (formData.get("action") !== "helpSettings") return;
   if (formData.get("toggleAllHelp")) {
-    user.helpSettings = user.helpSettings?.length === 0 ? availableHelp : [];
-    await user.save();
-    EventModel.create({
-      event: "HELP TOGGLE ALL",
-      user: user?._id,
-      value: user.helpSettings?.length === 0 ? "on" : "off",
-    });
+    window.localStorage.setItem(
+      "userHelpSettings",
+      JSON.stringify(userHelpSettings?.length === 0 ? availableHelp : [])
+    );
     return;
   }
   if (!formData.get("helpSetting")) return;
-  user.helpSettings = user.helpSettings.filter((_helpSetting) => _helpSetting !== formData.get("helpSetting"));
-  EventModel.create({
-    event: "HELP TOGGLE",
-    user: user?._id,
-    value: formData.get("helpSetting"),
-  });
-  await user.save();
+  window.localStorage.setItem(
+    "userHelpSettings",
+    JSON.stringify(userHelpSettings.filter((_helpSetting) => _helpSetting !== formData.get("helpSetting")))
+  );
 };
 
 export const HelpBlock = ({ children, helpSetting, className = "" }) => {
-  const { user } = useLoaderData();
   const submit = useSubmit();
-  const transition = useTransition();
 
-  const showHelp = useMemo(() => {
-    if (!user) return true;
-    const setting = user?.helpSettings.includes(helpSetting);
-    if (!["loading", "submitting"].includes(transition.state)) return setting;
-    if (transition.submission?.formData?.get("helpSetting") === helpSetting) return false;
-    if (transition.submission?.formData?.get("toggleAllHelp")) {
-      if (user?.helpSettings?.length === 0) return true;
-      return false;
-    }
-    return setting;
-  }, [transition, user, helpSetting]);
+  const userHelpSettings = JSON.parse(window.localStorage.getItem("userHelpSettings") || JSON.stringify(availableHelp));
+
+  const showHelp = userHelpSettings.includes(helpSetting);
 
   if (!showHelp) return null;
 
@@ -69,9 +52,7 @@ export const HelpBlock = ({ children, helpSetting, className = "" }) => {
 };
 
 export const MainHelpButton = ({ className }) => {
-  const { user } = useLoaderData();
   const submit = useSubmit();
-  const transition = useTransition();
 
   const onShowAllHelp = () => {
     const formData = new FormData();
@@ -80,19 +61,9 @@ export const MainHelpButton = ({ className }) => {
     submit(formData, { method: "POST", replace: true });
   };
 
-  const caption = useMemo(() => {
-    if (["loading", "submitting"].includes(transition.state)) {
-      if (transition.submission?.formData?.get("helpSetting")) {
-        if (user?.helpSettings?.length === 1) return "Show help";
-        return "Hide help";
-      }
-      if (transition.submission?.formData?.get("toggleAllHelp")) {
-        if (user?.helpSettings?.length === 0) return "Hide help";
-        return "Show help";
-      }
-    }
-    return user?.helpSettings.length === 0 ? "Show help" : "Hide help";
-  }, [transition, user]);
+  const userHelpSettings = JSON.parse(window.localStorage.getItem("userHelpSettings") || JSON.stringify(availableHelp));
+
+  const caption = userHelpSettings.length === 0 ? "Show help" : "Hide help";
 
   return (
     <button type="button" className={["hidden md:inline-block", className].join(" ")} onClick={onShowAllHelp}>

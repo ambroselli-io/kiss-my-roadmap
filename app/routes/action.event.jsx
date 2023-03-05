@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
-import EventModel from "~/db/models/event.server";
-import { getUnauthentifiedUserFromCookie } from "~/services/auth.server";
+import EventModel from "../db/models/event.server";
+import { getUnauthentifiedUserFromCookie } from "../services/auth.server";
 import { useCallback, useEffect, useRef } from "react";
 import { useFetcher } from "@remix-run/react";
 

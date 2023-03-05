@@ -27,14 +27,14 @@ Schema.pre("findOne", function () {
 
 const FeatureModel = dbConnection.models[MODELNAME] || dbConnection.model(MODELNAME, Schema);
 
-if (process.env.NODE_ENV === "production") {
-  FeatureModel.syncIndexes();
-} else {
-  // global.__syncIndexes = global.__syncIndexes.filter((i) => i !== MODELNAME);
-  if (!global.__syncIndexes.includes(MODELNAME)) {
-    global.__syncIndexes.push(MODELNAME);
-    FeatureModel.syncIndexes();
-  }
-}
+// if (process.env.NODE_ENV === "production") {
+FeatureModel.syncIndexes();
+// } else {
+//   // global.__syncIndexes = global.__syncIndexes.filter((i) => i !== MODELNAME);
+//   if (!global.__syncIndexes.includes(MODELNAME)) {
+//     global.__syncIndexes.push(MODELNAME);
+//     FeatureModel.syncIndexes();
+//   }
+// }
 
 export default FeatureModel;

@@ -1,5 +1,5 @@
-import { useSearchParams } from "@remix-run/react";
-import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "~/components/TailwindModal";
+import { useSearchParams } from "react-router-dom";
+import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "./TailwindModal";
 const EasyContact = ({ param }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const onClose = () => {

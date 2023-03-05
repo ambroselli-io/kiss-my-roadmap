@@ -1,58 +1,22 @@
-import React, { useEffect } from "react";
-import { redirect } from "@remix-run/node";
+import React from "react";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
-import ProjectModel from "~/db/models/project.server";
-import { getUserFromCookie } from "~/services/auth.server";
-import TopMenu from "~/components/TopMenu";
-import { action as actionLogout } from "./action.logout";
-import FeatureModel from "~/db/models/feature.server";
-import { defaultFeatures } from "~/utils/defaultFeatures.server";
-import EventModel from "~/db/models/event.server";
-import { usePageLoadedEvent, useUserEvent } from "./action.event";
+import { redirect } from "react-router";
+import TopMenu from "../components/TopMenu";
+import { defaultFeatures } from "../utils/defaultFeatures.server";
+import ProjectModel from "../db/models/project.client";
+import FeatureModel from "../db/models/feature.client";
 
-export const action = async ({ request }) => {
-  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
-  const formData = await request.formData();
-  if (formData.get("action") === "logout") {
-    EventModel.create({
-      event: "PROJECTS LOGOUT",
-      user: user?._id,
-    });
-    return await actionLogout({ request, to: "/project/new-project/register" });
-  }
-  const newProject = await ProjectModel.create({
-    createdBy: user._id,
-    users: [
-      {
-        user: user._id,
-        permission: "admin",
-        email: user.email,
-      },
-    ],
-  });
-  EventModel.create({
-    event: "PROJECTS NEW PROJECT",
-    user: user?._id,
-    project: newProject._id,
-  });
-  for (const feature of defaultFeatures) {
-    await FeatureModel.create({
-      project: newProject._id,
-      createdBy: user._id,
-      ...feature,
-    });
-  }
+export const action = async () => {
+  const newProject = ProjectModel.create();
+  FeatureModel.createMany(defaultFeatures.map((feature) => ({ ...feature, project: newProject._id })));
   return redirect(`/project/${newProject._id}`);
 };
 
-export const loader = async ({ request }) => {
-  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project" });
-
-  const projects = await ProjectModel.find({ "users.user": user._id });
-
+export const loader = async () => {
+  const projects = ProjectModel.find();
+  if (!projects.length) return redirect("/project/new");
   return {
     projects,
-    user,
   };
 };
 
@@ -64,14 +28,9 @@ export const meta = () => {
   ];
 };
 
-export default function Index() {
-  const { projects, user, features } = useLoaderData();
+export default function Projects() {
+  const { projects } = useLoaderData();
   const newProjectFetcher = useFetcher();
-
-  const sendUserEvent = useUserEvent();
-  usePageLoadedEvent({
-    event: "PROJECTS PAGE LOADED",
-  });
 
   const colors = [
     ["#2A9D8F", "#000"],
@@ -102,12 +61,6 @@ export default function Index() {
           <Link
             to={`/project/${project._id}`}
             key={project._id}
-            onClick={() => {
-              sendUserEvent({
-                event: "PROJECTS OPEN PROJECT",
-                projectId: project._id,
-              });
-            }}
             className="flex shrink-0 basis-full flex-col justify-between md:basis-1/4"
           >
             <div className="m-auto block w-full max-w-sm border-2 bg-white md:m-0 md:min-w-xs">

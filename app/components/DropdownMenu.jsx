@@ -4,17 +4,19 @@ export const DropdownMenu = ({ children, title, className, closeOnItemClick, id 
   const [showMenu, setOpenMenu] = useState(false);
 
   useEffect(() => {
-    const listener = (e) => {
+    function listener(e) {
       if (closeOnItemClick && e.target.closest(".menu-container")) {
         setOpenMenu(false);
         return;
       }
       if (e.target.closest(".menu-container")) return;
 
-      setOpenMenu(false);
-    };
+      // setOpenMenu(false);
+    }
     document.addEventListener("click", listener);
-    return () => document.removeEventListener("click", listener);
+    return () => {
+      document.removeEventListener("click", listener);
+    };
   }, [showMenu, closeOnItemClick]);
 
   return (

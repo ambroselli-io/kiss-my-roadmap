@@ -6,17 +6,17 @@ import { MONGO_URL, MONGODB_DB_NAME } from "../config.server";
 // create a new connection to the DB with every change either.
 let dbConnection = mongoose.connection;
 
-if (process.env.NODE_ENV === "production") {
-  dbConnection = mongoose.createConnection(MONGO_URL);
-} else {
-  if (!global.__db) {
-    global.__db = mongoose.createConnection(MONGO_URL);
-    global.__db.models = {};
-    global.__syncIndexes = [];
-  }
-  dbConnection = global.__db;
-  dbConnection.models = dbConnection.models || {};
-}
+// if (process.env.NODE_ENV === "production") {
+dbConnection = mongoose.createConnection(MONGO_URL);
+// } else {
+//   if (!global.__db) {
+//     global.__db = mongoose.createConnection(MONGO_URL);
+//     global.__db.models = {};
+//     global.__syncIndexes = [];
+//   }
+//   dbConnection = global.__db;
+//   dbConnection.models = dbConnection.models || {};
+// }
 
 dbConnection.on("error", console.error.bind(console, `MongoDB ${MONGODB_DB_NAME} connection error:`));
 

@@ -1,205 +1,114 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Outlet, useFetchers, useLoaderData, useLocation, useNavigate, useSubmit } from "@remix-run/react";
-import FeatureModel from "~/db/models/feature.server";
-import ProjectModel from "~/db/models/project.server";
-import { json, redirect } from "@remix-run/node";
-import { appendScore } from "~/utils/score";
-import { sortFeatures } from "~/utils/sort";
-import { helpAction } from "~/components/HelpBlock";
-import { getUnauthentifiedUserFromCookie, getUserFromCookie } from "~/services/auth.server";
-import { StatusesFilter } from "~/components/Feature/StatusesFilter";
-import { SortArrowButton } from "~/components/Feature/SortArrowButton";
-import { SortDropDown } from "~/components/Feature/SortDropDown";
-import { FeatureRow } from "~/components/Feature/FeatureRow";
-import { FeatureCard } from "~/components/Feature/FeatureCard";
-import ProjectMetadata from "~/components/ProjectMetadata";
-import { action as actionLogout } from "./action.logout";
-import TopMenu from "~/components/TopMenu";
-import { defaultFeatures } from "~/utils/defaultFeatures.server";
-import EventModel from "~/db/models/event.server";
-import OnboardModal from "~/components/OnboardModal";
-import { usePageLoadedEvent } from "./action.event";
+import { Outlet, useLoaderData, useLocation, useNavigate, json, redirect } from "react-router";
+import { useFetchers, useSubmit } from "react-router-dom";
+import { appendScore } from "../utils/score";
+import { sortFeatures } from "../utils/sort";
+import { helpAction } from "../components/HelpBlock";
+import { StatusesFilter } from "../components/Feature/StatusesFilter";
+import { SortArrowButton } from "../components/Feature/SortArrowButton";
+import { SortDropDown } from "../components/Feature/SortDropDown";
+import { FeatureRow } from "../components/Feature/FeatureRow";
+import { FeatureCard } from "../components/Feature/FeatureCard";
+import ProjectMetadata from "../components/ProjectMetadata";
+import TopMenu from "../components/TopMenu";
+import { defaultFeatures } from "../utils/defaultFeatures.server";
+import OnboardModal from "../components/OnboardModal";
+import ProjectModel from "../db/models/project.client";
+import FeatureModel from "../db/models/feature.client";
 
 export const action = async ({ request, params }) => {
   const formData = await request.formData();
-  const user = await getUserFromCookie(request, { failureRedirect: "/project/new-project/register" });
-  const url = new URL(request.url);
-  const isRegistering = url.pathname.includes("register");
   let projectId = params.projectId;
-  if (formData.get("action") === "logout") {
-    EventModel.create({
-      event: "PROJECT LOGOUT",
-      user: user._id,
-    });
-    return await actionLogout({ request, to: "/project/new-project/register" });
-  }
   if (!projectId) {
-    if (isRegistering) return;
     return redirect("/project/new-project");
   }
   if (projectId === "new-project") {
-    if (isRegistering) return;
-    const newProject = await ProjectModel.create({
+    const newProject = ProjectModel.create({
       title: formData.get("title") || "",
       description: formData.get("description") || "",
-      createdBy: user._id,
-      users: [
-        {
-          user: user._id,
-          permission: "admin",
-          email: user.email,
-        },
-      ],
     });
-    for (const feature of defaultFeatures) {
-      await FeatureModel.create({
+    FeatureModel.createMany(
+      defaultFeatures.map((feature) => ({
         project: newProject._id,
-        createdBy: user._id,
         ...feature,
-      });
-    }
-    EventModel.create({
-      event: "PROJECT CREATE FROM TEMPLATE",
-      user: user._id,
-      project: newProject._id,
-    });
+      }))
+    );
     projectId = newProject._id;
     return redirect(`/project/${projectId}`);
   }
 
-  const project = await ProjectModel.findById(projectId);
+  const project = ProjectModel.findById(projectId);
   if (!project) {
     return json({ ok: false }, { status: 404 });
-  }
-  if (!project.users.find((u) => user._id.equals(u.user))) {
-    return json({ ok: false }, { status: 403 });
   }
 
   if (formData.get("action") === "sort") {
     if (formData.get("sortBy")) project.sortBy = formData.get("sortBy");
     if (formData.get("sortOrder")) project.sortOrder = formData.get("sortOrder");
     if (!project.sortOrder) project.sortOrder = "ASC";
-    await project.save();
-    EventModel.create({
-      event: "PROJECT SORT",
-      user: user._id,
-      project: projectId,
-      value: JSON.stringify({ sortBy: project.sortBy, sortOrder: project.sortOrder }),
-    });
+    ProjectModel.findByIdAndUpdate(project._id, project);
     return json({ ok: true });
   }
 
   if (formData.get("action") === "filter") {
     const statusToToggle = formData.get("status");
-    if (project.filteredStatuses.includes(statusToToggle)) {
+    if (project.filteredStatuses?.includes(statusToToggle)) {
       project.filteredStatuses = project.filteredStatuses.filter((status) => status !== statusToToggle);
       project.sortedFeaturesIds = [];
     } else {
       project.filteredStatuses = [...(project.filteredStatuses || []), statusToToggle];
     }
-    await project.save();
-    EventModel.create({
-      event: "PROJECT FILTER",
-      user: user._id,
-      project: projectId,
-      value: JSON.stringify(project.filteredStatuses),
-    });
+    ProjectModel.findByIdAndUpdate(project._id, project);
     return json({ ok: true });
   }
 
   if (formData.get("action") === "deleteFeature") {
-    await FeatureModel.findByIdAndUpdate(formData.get("featureId"), { deletedAt: new Date(), deletedBy: user._id });
-    EventModel.create({
-      event: "PROJECT DELETE FEATURE",
-      user: user._id,
-      project: projectId,
-      feature: formData.get("featureId"),
-    });
+    FeatureModel.findByIdAndUpdate(formData.get("featureId"), { deletedAt: new Date(), deletedBy: user._id });
     return json({ ok: true });
   }
 
   if (formData.get("action") === "deleteProject") {
-    await ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date(), deletedBy: user._id });
-    await FeatureModel.updateMany({ project: projectId }, { deletedAt: new Date(), deletedBy: user._id });
-    EventModel.create({
-      event: "PROJECT DELETE PROJECT",
-      user: user._id,
-      project: projectId,
-    });
+    ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date(), deletedBy: user._id });
+    FeatureModel.updateMany({ project: projectId }, { deletedAt: new Date(), deletedBy: user._id });
     return redirect("../");
   }
 
   if (formData.get("action") === "newProject") {
-    const newProject = await ProjectModel.create({
-      createdBy: user._id,
-      users: [
-        {
-          user: user._id,
-          permission: "admin",
-          email: user.email,
-        },
-      ],
-    });
-    for (const feature of defaultFeatures) {
-      await FeatureModel.create({
+    const newProject = ProjectModel.create();
+    FeatureModel.createMany(
+      defaultFeatures.map((feature) => ({
         project: newProject._id,
-        createdBy: user._id,
         ...feature,
-      });
-    }
-    EventModel.create({
-      event: "PROJECT CREATE FROM BUTTON NEW PROJECT",
-      user: user._id,
-      project: newProject._id,
-    });
+      }))
+    );
     return redirect(`/project/${newProject._id}`);
   }
 
   if (formData.get("action") === "updateProject") {
     if (formData.get("title")) project.title = formData.get("title");
     if (formData.get("description")) project.description = formData.get("description");
-    await project.save();
-    EventModel.create({
-      event: "PROJECT UPDATE METADATA",
-      user: user._id,
-      project: projectId,
-      value: JSON.stringify({ title: project.title, description: project.description }),
-    });
+    ProjectModel.findByIdAndUpdate(project._id, project);
     return json({ ok: true });
   }
 
   if (formData.get("action") === "helpSettings") {
-    await helpAction({ user, formData });
+    await helpAction({ formData });
     return json({ ok: true });
   }
 
   if (formData.get("featureId")) {
-    const feature = await FeatureModel.findById(formData.get("featureId"));
+    const feature = FeatureModel.findById(formData.get("featureId"));
     if (!feature) return json({ ok: false });
     if (formData.get("content") && formData.get("content") !== feature.content) {
       feature.content = formData.get("content");
       if (feature.content?.length > 0 && feature.status === "__new") feature.status = "";
       if (["content"].includes(project.sortBy)) project.sortBy = null;
-      EventModel.create({
-        event: "PROJECT UPDATE FEATURE CONTENT",
-        user: user._id,
-        project: projectId,
-        feature: feature._id,
-        value: JSON.stringify(feature),
-      });
     }
     if (formData.get("devCost")) {
       feature.devCost = formData.get("devCost") === feature.devCost ? "" : formData.get("devCost");
       if (["devCost", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
-      EventModel.create({
-        event: `PROJECT UPDATE FEATURE DEV COST ${feature.devCost}`,
-        user: user._id,
-        project: projectId,
-        feature: feature._id,
-        value: JSON.stringify(feature),
-      });
     }
     if (formData.get("businessValue")) {
       feature.businessValue =
@@ -207,104 +116,53 @@ export const action = async ({ request, params }) => {
       if (["businessValue", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
-      EventModel.create({
-        event: `PROJECT UPDATE FEATURE BUSINESS VALUE ${feature.businessValue}`,
-        user: user._id,
-        project: projectId,
-        feature: feature._id,
-        value: JSON.stringify(feature),
-      });
     }
     if (formData.get("priority")) {
       feature.priority = formData.get("priority") === feature.priority ? "" : formData.get("priority");
       if (["priority", "score", "status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
-      EventModel.create({
-        event: `PROJECT UPDATE FEATURE PRIORITY ${feature.priority}`,
-        user: user._id,
-        project: projectId,
-        feature: feature._id,
-        value: JSON.stringify(feature),
-      });
     }
     if (formData.get("status")) {
       feature.status = formData.get("status") === feature.status ? "" : formData.get("status");
       if (["status"].includes(project.sortBy)) {
         project.sortBy = null;
       }
-      EventModel.create({
-        event: `PROJECT UPDATE FEATURE STATUS ${feature.status}`,
-        user: user._id,
-        project: projectId,
-        feature: feature._id,
-        value: JSON.stringify(feature),
-      });
     }
-    await project.save();
-    await feature.save();
+    ProjectModel.findByIdAndUpdate(project._id, project);
+    FeatureModel.findByIdAndUpdate(feature._id, feature);
     return json({ ok: true });
   }
   return json({ ok: true });
 };
 
 export const loader = async ({ request, params }) => {
-  const user = await getUnauthentifiedUserFromCookie(request);
-
   const projectId = params.projectId;
   if (!projectId) return redirect("/project/new-project");
   if (projectId === "new-project") {
-    EventModel.create({
-      event: "PROJECT LOAD FROM NEW-PROJECT ID",
-      user: user?._id,
-    });
     return {
       project: {},
       features: [...defaultFeatures.map(appendScore), { status: "__new" }],
-      user: user?.me?.(),
     };
   }
-  const project = await ProjectModel.findById(projectId);
+  const project = ProjectModel.findById(projectId);
   if (!project) {
-    EventModel.create({
-      event: "PROJECT NOT FOUND",
-      user: user?._id,
-    });
     return redirect("/project/new-project");
   }
-  if (!user) {
-    EventModel.create({
-      event: "PROJECT LOAD WITH NO USER",
-      user: user?._id,
-    });
-    if (!project.isPubliclyReadable) {
-      return {
-        project: {
-          ...project?.toObject(),
-          description: "",
-        },
-        features: [{ status: "__new" }],
-        user: null,
-      };
-    }
-  }
 
-  if (!project.isPubliclyReadable && !project?.users?.find(({ user: userId }) => user._id.equals(userId))) {
-    return redirect("/");
-  }
-  const features = await FeatureModel.find({
+  const features = FeatureModel.find({
     project: projectId,
     status: { $nin: [...(project?.filteredStatuses || []), "__new"] },
-  }).lean();
+  });
 
   if (!project.sortedFeaturesIds || project.sortedFeaturesIds.length === 0) {
     project.sortedFeaturesIds = features.map((f) => f._id);
-    await project.save();
+    ProjectModel.findByIdAndUpdate(project._id, project);
   }
 
   let augmentedFeatures = project.sortedFeaturesIds
     .map((featureId) => {
-      const feature = features.find((_feature) => featureId.equals(_feature._id));
+      const feature = features.find((_feature) => featureId === _feature._id);
       if (!feature) return null;
       return appendScore(feature);
     })
@@ -314,14 +172,9 @@ export const loader = async ({ request, params }) => {
     augmentedFeatures = augmentedFeatures.sort(sortFeatures(project.sortBy, project.sortOrder));
   }
 
-  let newFeature = await FeatureModel.findOne({ project: projectId, status: "__new" }).lean();
+  let newFeature = FeatureModel.findOne({ project: projectId, status: "__new" });
   if (!newFeature) {
-    EventModel.create({
-      event: "PROJECT NEW FEATURE CREATED",
-      user: user?._id,
-    });
-    newFeature = new FeatureModel({ project: projectId, status: "__new" });
-    await newFeature.save();
+    newFeature = FeatureModel.create({ project: projectId, status: "__new" });
   }
 
   augmentedFeatures.push(newFeature);
@@ -330,11 +183,10 @@ export const loader = async ({ request, params }) => {
     return {
       project,
       features: augmentedFeatures,
-      user: user?.me?.(),
     };
   } finally {
     project.sortedFeaturesIds = augmentedFeatures.map((f) => f._id);
-    await project.save();
+    ProjectModel.findByIdAndUpdate(project._id, project);
   }
 };
 
@@ -366,10 +218,10 @@ export const meta = ({ data }) => {
   ];
 };
 
-export default function Index() {
+export default function ProjectId() {
   const data = useLoaderData();
   const fetchers = useFetchers();
-  const { project, user } = data;
+  const { project } = data;
 
   const featuresAdded = useRef(null);
   const features = useMemo(() => {
@@ -414,19 +266,6 @@ export default function Index() {
     },
     [sortBy, sortOrder, submit]
   );
-
-  const navigate = useNavigate();
-  const location = useLocation();
-  useEffect(() => {
-    if (!user?._id && !!project?._id && !location.pathname.includes("register")) {
-      navigate("register");
-    }
-  }, [project, user, navigate, location.pathname]);
-
-  usePageLoadedEvent({
-    event: "PROJECT PAGE LOADED",
-    projectId: project._id,
-  });
 
   return (
     <>

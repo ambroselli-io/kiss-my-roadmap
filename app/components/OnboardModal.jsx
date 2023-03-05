@@ -1,28 +1,20 @@
-import { useLocation } from "react-router";
-import { useLoaderData } from "@remix-run/react";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "~/components/TailwindModal";
-import { useUserEvent } from "~/routes/action.event";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "./TailwindModal";
 
 const OnboardModal = () => {
-  const { user } = useLoaderData();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const sendUserEvent = useUserEvent();
   const [searchParams, setSearchParams] = useSearchParams();
-  const now = Date.now();
   const onClose = () => {
     window.sessionStorage.setItem("onboard-modal", "true");
     searchParams.delete("onboarding");
     setSearchParams(searchParams);
-    sendUserEvent({ event: "ONBOARDING MODAL CLOSED", value: Date.now() - now });
     setIsOpen(false);
   };
 
   useEffect(() => {
     if (
-      !user?._id &&
       location.pathname.includes("/new") &&
       window.sessionStorage.getItem("onboard-modal") !== "true" &&
       !searchParams.get("onboarding")
@@ -30,9 +22,8 @@ const OnboardModal = () => {
       setIsOpen(true);
       searchParams.set("onboarding", "true");
       setSearchParams(searchParams);
-      sendUserEvent({ event: "ONBOARDING MODAL OPEN", value: Date.now() });
     }
-  }, [user, location.pathname, searchParams, setSearchParams, sendUserEvent]);
+  }, [location.pathname, searchParams, setSearchParams]);
 
   return (
     <ModalContainer open={isOpen} onClose={onClose} blurryBackground size="3xl">

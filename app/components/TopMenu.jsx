@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
-import { Form, Link, useLoaderData, useSubmit } from "@remix-run/react";
-import { MainHelpButton } from "~/components/HelpBlock";
-import { DropdownMenu } from "~/components/DropdownMenu";
-import OpenTrash from "~/components/OpenTrash";
+import { Form, Link, useLoaderData, useSubmit } from "react-router-dom";
+import { MainHelpButton } from "./HelpBlock";
+import { DropdownMenu } from "./DropdownMenu";
+import OpenTrash from "./OpenTrash";
 import EasyContact from "./EasyContact";
 
 const TopMenu = () => {
-  const { user, project } = useLoaderData();
+  const { project } = useLoaderData();
 
   const submit = useSubmit();
 
@@ -35,49 +35,36 @@ const TopMenu = () => {
     <>
       <header className="border-b-2 text-xs">
         <div className="relative flex justify-between">
-          {!!user?._id && (
-            <>
-              <div className="flex gap-2">
-                <DropdownMenu
-                  id="header-menu-project"
-                  closeOnItemClick
-                  title="Projects"
-                  className="[&_.menu-container]:min-w-max"
-                >
-                  <div className="flex flex-col items-start" id="top-menu">
-                    {!!project?._id && (
-                      <Link to="/" className="inline-flex items-center gap-1">
-                        <div className="h-6 w-6" /> My projects
-                      </Link>
-                    )}
-                    <button
-                      form="top-menu"
-                      type="button"
-                      className="inline-flex items-center gap-1"
-                      onClick={onNewProject}
-                    >
-                      <div className="inline-flex h-6 w-6 items-center justify-center">+</div> New project
-                    </button>
-                    {!!project?._id && (
-                      <button
-                        form="top-menu"
-                        type="button"
-                        className="inline-flex items-center gap-1 text-red-500 hover:text-red-600"
-                        onClick={onDelete}
-                      >
-                        <OpenTrash className="h-6 w-6" /> Delete project
-                      </button>
-                    )}
-                  </div>
-                </DropdownMenu>
+          <div className="flex gap-2">
+            <DropdownMenu
+              id="header-menu-project"
+              closeOnItemClick
+              title="Projects"
+              className="[&_.menu-container]:min-w-max"
+            >
+              <div className="flex flex-col items-start" id="top-menu">
+                {!!project?._id && (
+                  <Link to="/" className="inline-flex items-center gap-1">
+                    <div className="h-6 w-6" /> My projects
+                  </Link>
+                )}
+                <button form="top-menu" type="button" className="inline-flex items-center gap-1" onClick={onNewProject}>
+                  <div className="inline-flex h-6 w-6 items-center justify-center">+</div> New project
+                </button>
+                {!!project?._id && (
+                  <button
+                    form="top-menu"
+                    type="button"
+                    className="inline-flex items-center gap-1 text-red-500 hover:text-red-600"
+                    onClick={onDelete}
+                  >
+                    <OpenTrash className="h-6 w-6" /> Delete project
+                  </button>
+                )}
               </div>
-              {!!project?._id && (
-                <Link to="users" className="inline-flex items-center gap-1 py-2 px-4">
-                  Users
-                </Link>
-              )}
-            </>
-          )}
+            </DropdownMenu>
+          </div>
+
           {/* <Form
             method="post"
             action="/action/bug"
@@ -96,7 +83,7 @@ const TopMenu = () => {
             </button>
           </Form>
           {!!project?._id && <MainHelpButton className="py-2 px-4" />}
-          <button
+          {/* <button
             formMethod="post"
             formAction="/action/logout"
             className="py-2 px-4 text-right"
@@ -119,7 +106,7 @@ const TopMenu = () => {
                 )}
               </>
             )}
-          </button>
+          </button> */}
         </div>
       </header>
       <EasyContact param="show-contact-modal" />

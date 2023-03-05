@@ -58,14 +58,14 @@ Schema.methods.me = function () {
 
 const ProjectModel = dbConnection.models[MODELNAME] || dbConnection.model(MODELNAME, Schema);
 
-if (process.env.NODE_ENV === "production") {
-  ProjectModel.syncIndexes();
-} else {
-  // global.__syncIndexes = global.__syncIndexes.filter((i) => i !== MODELNAME);
-  if (!global.__syncIndexes.includes(MODELNAME)) {
-    global.__syncIndexes.push(MODELNAME);
-    ProjectModel.syncIndexes();
-  }
-}
+// if (process.env.NODE_ENV === "production") {
+ProjectModel.syncIndexes();
+// } else {
+//   // global.__syncIndexes = global.__syncIndexes.filter((i) => i !== MODELNAME);
+//   if (!global.__syncIndexes.includes(MODELNAME)) {
+//     global.__syncIndexes.push(MODELNAME);
+//     ProjectModel.syncIndexes();
+//   }
+// }
 
 export default ProjectModel;

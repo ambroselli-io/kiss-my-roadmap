@@ -1,5 +1,8 @@
+import dotenv from "dotenv";
 import { name, description } from "../package.json";
 const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+dotenv.config({ path: ".env" });
 
 const MONGO_URL = process.env.MONGODB_ADDON_URI;
 const APP_NAME = capitalizeFirstLetter(name);

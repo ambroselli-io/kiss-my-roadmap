@@ -1,21 +1,20 @@
 import React, { useMemo, useState } from "react";
-import { Form, useLoaderData, useSubmit, useTransition } from "@remix-run/react";
-import ProjectModel from "~/db/models/project.server";
+import { Form, useLoaderData, useSubmit } from "@remix-run/react";
+import ProjectModel from "../db/models/project.client";
 import HelpBlock from "./HelpBlock";
 
 export const action = async ({ formData, projectId }) => {
   if (formData.get("action") === "updateProject") {
-    const project = await ProjectModel.findById(projectId);
+    const project = ProjectModel.findById(projectId);
     if (formData.get("title")) project.title = formData.get("title");
     if (formData.get("description")) project.description = formData.get("description");
-    await project.save();
+    ProjectModel.findByIdAndUpdate(projectId, project);
     return true;
   }
 };
 
 const ProjectMetadata = () => {
   const { project } = useLoaderData();
-  const transition = useTransition();
 
   const submit = useSubmit();
 
@@ -29,13 +28,11 @@ const ProjectMetadata = () => {
   };
 
   const { title, description } = useMemo(() => {
-    if (!["loading", "submitting"].includes(transition.state)) return project || {};
-    if (transition.submission?.formData?.get("action") !== "updateProject") return project || {};
     return {
-      title: transition.submission?.formData?.get("title") ?? project?.title,
-      description: transition.submission?.formData?.get("description") ?? project?.description,
+      title: project?.title,
+      description: project?.description,
     };
-  }, [project, transition.state, transition.submission?.formData]);
+  }, [project]);
 
   return (
     <Form className="mt-0.5 flex shrink-0 flex-col md:pb-10" onBlur={submitMetadata} id="project-metadata">

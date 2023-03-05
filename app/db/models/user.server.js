@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dbConnection from "../mongo.server";
-import { availableHelp } from "~/utils/help.server";
+import { availableHelp } from "../../utils/help.server";
 const MODELNAME = "User";
 
 const Schema = new mongoose.Schema(

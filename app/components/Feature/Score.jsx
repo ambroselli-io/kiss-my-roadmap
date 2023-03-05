@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { getScore } from "~/utils/score";
+import { getScore } from "../../utils/score";
 
 export const Score = ({ feature, featureFetcher, className = "" }) => {
   const score = useMemo(() => {

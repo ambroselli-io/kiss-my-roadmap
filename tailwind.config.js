@@ -2,7 +2,7 @@ const theme = require("tailwindcss/defaultTheme");
 
 module.exports = {
   mode: "jit",
-  content: ["./app/**/*.{ts,tsx,jsx,js}"],
+  content: ["./app/index.html", "./app/**/*.{ts,tsx,jsx,js}"],
   darkMode: "class", //https://tailwindcss.com/docs/dark-mode#toggling-dark-mode-manually
   theme: {
     fontFamily: {
