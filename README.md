@@ -1,36 +1,13 @@
-# Welcome to Remix - the Dub Stack !
+## What is Kiss my Roadmap 💋 ?
 
-This stack is very simple
+A demo is worth a thousand words: https://roadmap.kiss-my.app/
 
-- It only integrates MongoDB properly
-- It can run with any Node server
-- It provides the proper Clever CLoud environment to deploy on [Clever Cloud](https://www.clever-cloud.com)
+## Feedback & Roadmap
 
-## Development
+Kiss my Roadmap is a MVP (Minimum Viable Product) and is still in active development. If you have any feedback or suggestions, please [open an issue](https://github.com/ambroselli-io/kiss-my-roadmap/issues/new/choose).
 
-From your terminal:
+To stay up to date with all the latest news and product updates, make sure to follow me on [Twitter](https://twitter.com/ambroselli_io).
 
-```sh
-npm run dev
-```
+## License
 
-This starts your app in development mode, rebuilding assets on file changes.
-
-## Deployment
-
-First, build your app for production:
-
-```sh
-npm run build
-```
-
-Then run the app in production mode:
-
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-The `.env` provided is filled up with the proper Clever Cloud environment variables.
-Just create a Node application with those variables and it will work out of the box !
+Kiss my Invoices is open-source under the GNU Affero General Public License Version 3 (AGPLv3) or any later version. You can [find it here](https://github.com/ambroselli-io/kiss-my-roadmap/blob/main/LICENSE).
