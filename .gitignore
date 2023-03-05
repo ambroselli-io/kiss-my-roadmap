@@ -11,3 +11,5 @@ node_modules
 .DS_Store
 
 bfg.jar
+.sentryclirc
+.cache_ggshield
