@@ -6,8 +6,6 @@ node_modules
 /public/build
 .env
 
-/app/styles/tailwind.css
-
 .DS_Store
 
 bfg.jar
