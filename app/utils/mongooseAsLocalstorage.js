@@ -13,6 +13,7 @@ const withTimestamps = (data, isSoftDeleting = false) => {
 };
 
 const handleQuery = (query) => (item) => {
+  if (item.deletedAt) return false;
   const keys = Object.keys(query);
   for (const key of keys) {
     if (typeof query[key] === "string") {
