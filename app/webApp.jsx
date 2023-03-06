@@ -12,16 +12,7 @@ function webLoader() {
 }
 
 function Root() {
-  return (
-    <>
-      <Outlet />
-      {import.meta.env.PROD === "production" && (
-        <>
-          <script defer data-domain="froadmap.com" src="https://plausible.io/js/script.js"></script>
-        </>
-      )}
-    </>
-  );
+  return <Outlet />;
 }
 
 export default function ErrorPage() {
