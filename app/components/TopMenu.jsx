@@ -64,49 +64,12 @@ const TopMenu = () => {
               </div>
             </DropdownMenu>
           </div>
-
-          {/* <Form
-            method="post"
-            action="/action/bug"
-            className="ml-auto inline-flex items-center gap-1 py-2 px-4"
-            onSubmit={() => {
-              throw new Error("test sentry front");
-            }}
-          >
-            <button value="true" name="bug" type="submit">
-              Bug
-            </button>
-          </Form> */}
           <Form method="get" className="ml-auto inline-flex items-center gap-1 py-2 px-4" id="contact-modal">
             <button value="true" name="show-contact-modal" type="submit">
               Contact
             </button>
           </Form>
           {!!project?._id && <MainHelpButton className="py-2 px-4" />}
-          {/* <button
-            formMethod="post"
-            formAction="/action/logout"
-            className="py-2 px-4 text-right"
-            type="button"
-            onClick={(e) => {
-              const formData = new FormData();
-              formData.append("action", "logout");
-              submit(formData, { method: "POST", replace: true });
-            }}
-          >
-            {!user?._id ? (
-              "Register"
-            ) : (
-              <>
-                Logout{" "}
-                {(!!user?.email || !!user?.username) && (
-                  <>
-                    <span className="hidden md:inline">({user.email || user.username})</span>
-                  </>
-                )}
-              </>
-            )}
-          </button> */}
         </div>
       </header>
       <EasyContact param="show-contact-modal" />

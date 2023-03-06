@@ -63,13 +63,13 @@ export const action = async ({ request, params }) => {
   }
 
   if (formData.get("action") === "deleteFeature") {
-    FeatureModel.findByIdAndUpdate(formData.get("featureId"), { deletedAt: new Date(), deletedBy: user._id });
+    FeatureModel.findByIdAndUpdate(formData.get("featureId"), { deletedAt: new Date() });
     return json({ ok: true });
   }
 
   if (formData.get("action") === "deleteProject") {
-    ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date(), deletedBy: user._id });
-    FeatureModel.updateMany({ project: projectId }, { deletedAt: new Date(), deletedBy: user._id });
+    ProjectModel.findByIdAndUpdate(projectId, { deletedAt: new Date() });
+    FeatureModel.updateMany({ project: projectId }, { deletedAt: new Date() });
     return redirect("../");
   }
 
