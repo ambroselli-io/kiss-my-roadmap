@@ -1,12 +1,12 @@
 import { useLocation, useNavigate, useOutletContext } from "react-router";
 import { Form, useTransition } from "@remix-run/react";
-import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "~/components/TailwindModal";
+import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "../components/TailwindModal";
 import { json } from "@remix-run/node";
-import UserModel from "~/db/models/user.server";
-import ProjectModel from "~/db/models/project.server";
+import UserModel from "../db/models/user.server";
+import ProjectModel from "../db/models/project.server";
 import { useMemo, useState } from "react";
-import EventModel from "~/db/models/event.server";
-import { getUserFromCookie } from "~/services/auth.server";
+import EventModel from "../db/models/event.server";
+import { getUserFromCookie } from "../services/auth.server";
 import { usePageLoadedEvent } from "./action.event";
 
 export const action = async ({ request, params }) => {

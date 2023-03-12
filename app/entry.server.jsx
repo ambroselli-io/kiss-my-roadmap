@@ -1,11 +1,10 @@
-import "./db/mongo.server";
 import { PassThrough } from "stream";
 import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import * as Sentry from "@sentry/remix";
-import { SENTRY_XXX, ENVIRONMENT } from "~/config.server";
+import { SENTRY_XXX, ENVIRONMENT } from "./config.server";
 
 if (process.env.NODE_ENV === "production") {
   Sentry.init({

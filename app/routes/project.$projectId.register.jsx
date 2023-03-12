@@ -1,17 +1,17 @@
-import UserModel from "~/db/models/user.server";
+import UserModel from "../db/models/user.server";
 import bcrypt from "bcryptjs";
 import { json, useLocation, useNavigate } from "react-router";
 import { Form, useActionData } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { createUserSession } from "~/services/auth.server";
-import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "~/components/TailwindModal";
-import PasswordInput from "~/components/PasswordInput";
-import OpenInNewWindowIcon from "~/components/icons/OpenInNewWindowIcon";
-import { getPasswordStrengthInTime } from "~/utils/passwordStrength.client";
-import EventModel from "~/db/models/event.server";
+import { createUserSession } from "../services/auth.server";
+import { ModalBody, ModalContainer, ModalFooter, ModalHeader } from "../components/TailwindModal";
+import PasswordInput from "../components/PasswordInput";
+import OpenInNewWindowIcon from "../components/icons/OpenInNewWindowIcon";
+import { getPasswordStrengthInTime } from "../utils/passwordStrength.client";
+import EventModel from "../db/models/event.server";
 import { usePageLoadedEvent, useUserEvent } from "./action.event";
-import ProjectModel from "~/db/models/project.server";
+import ProjectModel from "../db/models/project.server";
 import { redirect } from "@remix-run/node";
 
 export const action = async ({ request }) => {

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { APP_NAME, APP_URL, SECRET } from "~/config.server";
+import { APP_NAME, APP_URL, SECRET } from "../config.server";
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "../../tailwind.config.cjs";
 const fullConfig = resolveConfig(tailwindConfig);

@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/remix";
-import { ENVIRONMENT } from "~/config.server";
+import { ENVIRONMENT } from "../config.server";
 
 // https://docs.sentry.io/platforms/javascript/enriching-events/context/#example-usages
 
